@@ -1,8 +1,12 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,7 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, StartFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +44,17 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        if (savedInstanceState == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            StartFragment startFragment = new StartFragment();
+            SettingsFragment settingsFragment = new SettingsFragment();
+            transaction.add(R.id.content_frame, startFragment, "start_fragment");
+            transaction.add(R.id.content_frame, settingsFragment, "settings_fragment");
+            transaction.hide(settingsFragment);
+            transaction.commit();
+        }
     }
 
     @Override
@@ -66,9 +81,14 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag("settings_fragment");
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            return true;
+            hideAllFragments();
+            transaction.show(settingsFragment);
         }
 
         return super.onOptionsItemSelected(item);
@@ -80,25 +100,43 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        switch (id){
-            case R.id.nav_camera:
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+
+        StartFragment startFragment = (StartFragment) fm.findFragmentByTag("start_fragment");
+        SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag("settings_fragment");
+
+        switch (id) {
+            case R.id.nav_start:
+                hideAllFragments();
+                transaction.show(startFragment);
                 break;
-            case R.id.nav_gallery:
-                break;
-            case R.id.nav_slideshow:
-                break;
-            case R.id.nav_manage:
-                break;
-            case R.id.nav_share:
-                break;
-            case R.id.nav_send:
+            case R.id.nav_settings:
+                hideAllFragments();
+                transaction.show(settingsFragment);
                 break;
             default:
-                ;
         }
 
+        transaction.commit();
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void hideAllFragments() {
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        for (Fragment fragment : fm.getFragments()) {
+            if (fragment.isVisible()) {
+                transaction.hide(fragment);
+            }
+        }
+        transaction.commit();
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 }

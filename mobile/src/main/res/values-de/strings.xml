@@ -8,5 +8,11 @@
     <string name="navigation_drawer_open">Navigation Drawer öffnen</string>
     <string name="navigation_drawer_close">Navigation Drawer schließen</string>
 
+    <string name="action_start">Start</string>
     <string name="action_settings">Einstellungen</string>
+    <string name="action_send">Senden</string>
+    <string name="action_share">Teilen</string>
+
+    <string name="hello_start_fragment">Hallo Start Fragment</string>
+    <string name="hello_blank_fragment">Hallo Einstellungen Fragment</string>
 </resources>
