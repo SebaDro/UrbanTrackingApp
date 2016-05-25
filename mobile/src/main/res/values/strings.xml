@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">UrbanTrackingApp</string>
 
+    <string name="nav_name">Sebastian Drost and Matthias Stein</string>
+    <string name="nav_name2">Hochschule Bochum</string>
+
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
