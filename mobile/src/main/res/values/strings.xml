@@ -14,4 +14,7 @@
 
     <string name="hello_start_fragment">Hello start fragment</string>
     <string name="hello_blank_fragment">Hello settings fragment</string>
+
+    <string name="txt_longitude">Longitude</string>
+    <string name="txt_latitude">Latitude</string>
 </resources>

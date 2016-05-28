@@ -1,12 +1,16 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import drost_stein.fbg.hsbo.de.urbantrackingapp.databinding.FragmentStartBinding;
+import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
 
 /**
@@ -58,11 +62,16 @@ public class StartFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        FragmentStartBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_start, container, false);
+        TrackPoint trackPoint = new TrackPoint("52.31245", "7.34126", 100);
+        binding.setTrackPoint(trackPoint);
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_start, container, false);
     }
@@ -96,7 +105,7 @@ public class StartFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
