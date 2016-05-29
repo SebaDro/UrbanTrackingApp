@@ -1,6 +1,5 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="drost_stein.fbg.hsbo.de.urbantrackingapp.StartFragment">
+    >
 
     <data>
         <variable
@@ -21,21 +20,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/hello_start_fragment" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
                 <TextView
+                    android:layout_width="100dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/txt_trackID" />
+
+                <TextView
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{String.valueOf(trackPoint.trackID)}" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="@string/txt_latitude" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{trackPoint.latitude}" />
+                    android:text="@{String.valueOf(trackPoint.latitude)}" />
             </LinearLayout>
 
             <LinearLayout
@@ -43,14 +56,14 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:text="@string/txt_longitude" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{trackPoint.longitude}" />
+                    android:text="@{String.valueOf(trackPoint.longitude)}" />
 
             </LinearLayout>
 

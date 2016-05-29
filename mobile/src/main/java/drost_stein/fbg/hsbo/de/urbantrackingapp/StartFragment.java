@@ -70,10 +70,11 @@ public class StartFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         FragmentStartBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_start, container, false);
-        TrackPoint trackPoint = new TrackPoint("52.31245", "7.34126", 100);
+        TrackPoint trackPoint = new TrackPoint(52.31245, 7.34126, 100);
         binding.setTrackPoint(trackPoint);
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_start, container, false);
+        //return inflater.inflate(R.layout.fragment_start, container, false);
+        return binding.getRoot();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
