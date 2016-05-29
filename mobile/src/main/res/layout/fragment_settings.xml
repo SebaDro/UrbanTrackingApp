@@ -5,6 +5,7 @@
     tools:context="drost_stein.fbg.hsbo.de.urbantrackingapp.SettingsFragment">
 
     <TextView
+        android:id="@+id/settings_fragment_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:text="@string/hello_blank_fragment" />
