@@ -1,17 +1,21 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -118,16 +122,16 @@ public class MainActivity extends AppCompatActivity
                 transaction.show(settingsFragment);
                 break;
             case R.id.action_gps:
-                if (mGPSActive == false) {
-                    mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
-                    mGPSActive = true;
-                    mLocationServiceIntent.putExtra("type", "start");
-                    startService(mLocationServiceIntent);
-                } else if (mGPSActive == true) {
-                    mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
-                    mGPSActive = false;
-                    mLocationServiceIntent.putExtra("type", "end");
-                    startService(mLocationServiceIntent);
+                if (ContextCompat.checkSelfPermission(this,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                        android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+                } else {
+                    handleGPS();
                 }
                 break;
             default:
@@ -136,7 +140,9 @@ public class MainActivity extends AppCompatActivity
                 return super.onOptionsItemSelected(item);
         }
 
-        return super.onOptionsItemSelected(item);
+        return super.
+
+                onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -169,6 +175,20 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    public void handleGPS() {
+        if (mGPSActive == false) {
+            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
+            mGPSActive = true;
+            mLocationServiceIntent.putExtra("type", "start");
+            startService(mLocationServiceIntent);
+        } else if (mGPSActive == true) {
+            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
+            mGPSActive = false;
+            mLocationServiceIntent.putExtra("type", "end");
+            startService(mLocationServiceIntent);
+        }
+    }
+
     public void hideAllFragments() {
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
@@ -190,6 +210,23 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onFragmentInteraction(Uri uri) {
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 0: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay!
+                    handleGPS();
+                } else {
+                    // permission denied, boo!
+                }
+                return;
+            }
+        }
     }
 
     private class ResponseReceiver extends BroadcastReceiver {
