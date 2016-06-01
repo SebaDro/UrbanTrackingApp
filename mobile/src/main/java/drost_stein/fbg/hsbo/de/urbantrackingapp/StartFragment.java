@@ -2,6 +2,7 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,6 +33,7 @@ public class StartFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private TrackPoint mTrackPoint;
 
     public StartFragment() {
         // Required empty public constructor
@@ -70,8 +72,8 @@ public class StartFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         FragmentStartBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_start, container, false);
-        TrackPoint trackPoint = new TrackPoint(52.31245, 7.34126, 100);
-        binding.setTrackPoint(trackPoint);
+        mTrackPoint = new TrackPoint(0, 0, 100);
+        binding.setTrackPoint(mTrackPoint);
         // Inflate the layout for this fragment
         //return inflater.inflate(R.layout.fragment_start, container, false);
         return binding.getRoot();
@@ -114,5 +116,10 @@ public class StartFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    public void updatePoint(Location location) {
+        this.mTrackPoint.setLatitude(location.getLatitude());
+        this.mTrackPoint.setLongitude(location.getLongitude());
     }
 }

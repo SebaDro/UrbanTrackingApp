@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity
     private Location mLastLocation;
     private Menu mMenu;
     private static boolean mGPSActive = false;
+    private StartFragment mStartFragment;
+    private SettingsFragment mSettingsFragment;
 
     private static final String BROADCAST_ACTION = "drost_stein.fbg.hsbo.de.urbantrackingapp.BROADCAST";
     private static final String EXTENDED_DATA_LOCATION = "drost_stein.fbg.hsbo.de.urbantrackingapp.DATA";
@@ -75,11 +77,11 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState == null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
-            StartFragment startFragment = new StartFragment();
-            SettingsFragment settingsFragment = new SettingsFragment();
-            transaction.add(R.id.content_frame, startFragment, "start_fragment");
-            transaction.add(R.id.content_frame, settingsFragment, "settings_fragment");
-            transaction.hide(settingsFragment);
+            mStartFragment = new StartFragment();
+            mSettingsFragment = new SettingsFragment();
+            transaction.add(R.id.content_frame, mStartFragment, "start_fragment");
+            transaction.add(R.id.content_frame, mSettingsFragment, "settings_fragment");
+            transaction.hide(mSettingsFragment);
             transaction.commit();
         }
     }
@@ -112,14 +114,15 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction transaction = fm.beginTransaction();
-        SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag("settings_fragment");
-
         switch (id) {
             case R.id.action_settings:
                 hideAllFragments();
-                transaction.show(settingsFragment);
+                FragmentManager fm = getSupportFragmentManager();
+                FragmentTransaction transaction = fm.beginTransaction();
+                transaction.show(mSettingsFragment);
+                transaction.commit();
+                NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+                navigationView.getMenu().getItem(1).setChecked(true);
                 break;
             case R.id.action_gps:
                 if (ContextCompat.checkSelfPermission(this,
@@ -139,10 +142,7 @@ public class MainActivity extends AppCompatActivity
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
         }
-
-        return super.
-
-                onOptionsItemSelected(item);
+        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -154,17 +154,14 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction transaction = fm.beginTransaction();
 
-        StartFragment startFragment = (StartFragment) fm.findFragmentByTag("start_fragment");
-        SettingsFragment settingsFragment = (SettingsFragment) fm.findFragmentByTag("settings_fragment");
-
         switch (id) {
             case R.id.nav_start:
                 hideAllFragments();
-                transaction.show(startFragment);
+                transaction.show(mStartFragment);
                 break;
             case R.id.nav_settings:
                 hideAllFragments();
-                transaction.show(settingsFragment);
+                transaction.show(mSettingsFragment);
                 break;
             default:
         }
@@ -200,13 +197,6 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    public void updateCoordinateText() {
-        TextView coordinateText = (TextView) findViewById(R.id.settings_fragment_text);
-        if (coordinateText != null) {
-            coordinateText.setText(mLastLocation.getLongitude() + " " + mLastLocation.getLatitude());
-        }
-    }
-
     @Override
     public void onFragmentInteraction(Uri uri) {
 
@@ -234,7 +224,7 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             Location location = (Location) intent.getExtras().get(EXTENDED_DATA_LOCATION);
             mLastLocation = location;
-            updateCoordinateText();
+            mStartFragment.updatePoint(mLastLocation);
         }
     }
 

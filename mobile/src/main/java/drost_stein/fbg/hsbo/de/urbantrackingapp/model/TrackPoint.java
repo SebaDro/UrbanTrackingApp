@@ -8,7 +8,7 @@ import drost_stein.fbg.hsbo.de.urbantrackingapp.BR;
 /**
  * Created by Sebastian Drost on 28.05.2016.
  */
-public class TrackPoint extends BaseObservable{
+public class TrackPoint extends BaseObservable {
 
     private double latitude;
     private double longitude;
@@ -37,7 +37,6 @@ public class TrackPoint extends BaseObservable{
 
     @Bindable
     public double getLongitude() {
-
         return longitude;
     }
 
