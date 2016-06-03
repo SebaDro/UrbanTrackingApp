@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,18 +29,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.location.DetectedActivity;
+
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, StartFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
 
     private Intent mLocationServiceIntent;
     private Location mLastLocation;
+    private String mActivityString;
     private Menu mMenu;
     private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
 
-    private static final String BROADCAST_ACTION = "drost_stein.fbg.hsbo.de.urbantrackingapp.BROADCAST";
-    private static final String EXTENDED_DATA_LOCATION = "drost_stein.fbg.hsbo.de.urbantrackingapp.DATA";
+    public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
+    private static final String BROADCAST_ACTION_ACTIVITIES = PACKAGE_NAME + ".BROADCAST_ACTIVITIES";
+    private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
+    private static final String EXTENDED_DATA_ACTIVITIES = PACKAGE_NAME + ".DATA_ACTIVITIES";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,10 +60,15 @@ public class MainActivity extends AppCompatActivity
 
         mLocationServiceIntent = new Intent(Intent.ACTION_SYNC, null, this, LocationService.class);
 
-        ResponseReceiver responseReceiver = new ResponseReceiver();
-        IntentFilter intentFilter = new IntentFilter(BROADCAST_ACTION);
+        LocationResponseReceiver locationResponseReceiver = new LocationResponseReceiver();
+        IntentFilter intentFilter1 = new IntentFilter(BROADCAST_ACTION_LOCATION);
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                responseReceiver, intentFilter);
+                locationResponseReceiver, intentFilter1);
+
+        ActivitiesResponseReceiver activitiesResponseReceiver = new ActivitiesResponseReceiver();
+        IntentFilter intentFilter2 = new IntentFilter(BROADCAST_ACTION_ACTIVITIES);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                activitiesResponseReceiver, intentFilter2);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -219,14 +233,49 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private class ResponseReceiver extends BroadcastReceiver {
+    private class LocationResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = (Location) intent.getExtras().get(EXTENDED_DATA_LOCATION);
             mLastLocation = location;
-            mStartFragment.updatePoint(mLastLocation);
+            mStartFragment.updatePointLocation(mLastLocation);
         }
     }
 
+    private class ActivitiesResponseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITIES);
+            String activityString = "";
+            for (DetectedActivity activity : detectedActivities) {
+                activityString += "Activity: " + getDetectedActivity(activity.getType()) + ", Confidence: " + activity.getConfidence() + "%\n";
+            }
+            mActivityString = activityString;
+            mStartFragment.updatePointActivities(activityString);
+        }
+    }
 
+    public String getDetectedActivity(int detectedActivityType) {
+        Resources resources = this.getResources();
+        switch(detectedActivityType) {
+            case DetectedActivity.IN_VEHICLE:
+                return resources.getString(R.string.in_vehicle);
+            case DetectedActivity.ON_BICYCLE:
+                return resources.getString(R.string.on_bicycle);
+            case DetectedActivity.ON_FOOT:
+                return resources.getString(R.string.on_foot);
+            case DetectedActivity.RUNNING:
+                return resources.getString(R.string.running);
+            case DetectedActivity.WALKING:
+                return resources.getString(R.string.walking);
+            case DetectedActivity.STILL:
+                return resources.getString(R.string.still);
+            case DetectedActivity.TILTING:
+                return resources.getString(R.string.tilting);
+            case DetectedActivity.UNKNOWN:
+                return resources.getString(R.string.unknown);
+            default:
+                return resources.getString(R.string.unidentifiable_activity, detectedActivityType);
+        }
+    }
 }

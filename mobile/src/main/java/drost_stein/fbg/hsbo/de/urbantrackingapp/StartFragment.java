@@ -75,7 +75,7 @@ public class StartFragment extends Fragment {
         mTrackPoint = new TrackPoint(0, 0, 100);
         binding.setTrackPoint(mTrackPoint);
         // Inflate the layout for this fragment
-        //return inflater.inflate(R.layout.fragment_start, container, false);
+        // return inflater.inflate(R.layout.fragment_start, container, false);
         return binding.getRoot();
     }
 
@@ -118,8 +118,12 @@ public class StartFragment extends Fragment {
         void onFragmentInteraction(Uri uri);
     }
 
-    public void updatePoint(Location location) {
+    public void updatePointLocation(Location location) {
         this.mTrackPoint.setLatitude(location.getLatitude());
         this.mTrackPoint.setLongitude(location.getLongitude());
+    }
+
+    public void updatePointActivities(String activities) {
+        this.mTrackPoint.setActivities(activities);
     }
 }

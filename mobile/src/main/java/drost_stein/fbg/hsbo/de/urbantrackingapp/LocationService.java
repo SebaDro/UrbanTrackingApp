@@ -1,6 +1,7 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,6 +13,9 @@ import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -19,8 +23,9 @@ import com.google.android.gms.location.LocationServices;
 public class LocationService extends IntentService {
 
     private static MyLocationListener myLocationListener;
-    private static final String BROADCAST_ACTION = "drost_stein.fbg.hsbo.de.urbantrackingapp.BROADCAST";
-    private static final String EXTENDED_DATA_LOCATION = "drost_stein.fbg.hsbo.de.urbantrackingapp.DATA";
+    public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
+    private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
 
     public LocationService() {
         super("Location Service");
@@ -45,14 +50,14 @@ public class LocationService extends IntentService {
 
     public void sendLocation(Location location) {
         Intent localIntent =
-                new Intent(BROADCAST_ACTION)
+                new Intent(BROADCAST_ACTION_LOCATION)
                         // Puts the location into the Intent
                         .putExtra(EXTENDED_DATA_LOCATION, location);
         // Broadcasts the Intent to receivers in this app.
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
 
-    private class MyLocationListener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+    private class MyLocationListener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, ResultCallback<Status> {
         private GoogleApiClient mGoogleApiClient;
         private Location mLastLocation;
         private LocationRequest mLocationRequest;
@@ -70,6 +75,7 @@ public class LocationService extends IntentService {
                         .addConnectionCallbacks(this)
                         .addOnConnectionFailedListener(this)
                         .addApi(LocationServices.API)
+                        .addApi(ActivityRecognition.API)
                         .build();
             }
         }
@@ -96,6 +102,8 @@ public class LocationService extends IntentService {
 
             LocationServices.FusedLocationApi
                     .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            ActivityRecognition.ActivityRecognitionApi
+                    .requestActivityUpdates(mGoogleApiClient, 5000, getActivityDetectionPendingIntent()).setResultCallback(this);
         }
 
         @Override
@@ -114,6 +122,14 @@ public class LocationService extends IntentService {
             mLocationService.sendLocation(location);
         }
 
+        public void onResult(Status status) {
+            if (status.isSuccess()) {
+                //Log.e(TAG, "Successfully added activity detection.");
+            } else {
+                //Log.e(TAG, "Error: " + status.getStatusMessage());
+            }
+        }
+
         public void startLocationUpdates() {
             mGoogleApiClient.connect();
         }
@@ -121,8 +137,14 @@ public class LocationService extends IntentService {
         public void stopLocationUpdates() {
             if (mGoogleApiClient.isConnected()) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+                ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
             }
             mGoogleApiClient.disconnect();
+        }
+
+        private PendingIntent getActivityDetectionPendingIntent() {
+            Intent intent = new Intent(getBaseContext(), ActivitiesIntentService.class);
+            return PendingIntent.getService(getBaseContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         }
     }
 }
