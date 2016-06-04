@@ -124,6 +124,6 @@ public class StartFragment extends Fragment {
     }
 
     public void updatePointActivities(String activities) {
-        this.mTrackPoint.setActivities(activities);
+        this.mTrackPoint.setActivity(activities);
     }
 }

@@ -19,7 +19,7 @@
     <string name="txt_longitude">Longitude</string>
     <string name="txt_latitude">Latitude</string>
     <string name="txt_trackID">TrackID</string>
-    <string name="txt_activities">Activities</string>
+    <string name="txt_activity">Activity</string>
 
     <string name="in_vehicle">In a vehicle</string>
     <string name="on_bicycle">On a bicycle</string>

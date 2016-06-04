@@ -13,7 +13,7 @@ public class TrackPoint extends BaseObservable {
     private double latitude;
     private double longitude;
     private long trackID;
-    private String activities;
+    private String activity;
 
     public TrackPoint(double latitude, double longitude, long trackID) {
         this.latitude = latitude;
@@ -36,9 +36,9 @@ public class TrackPoint extends BaseObservable {
         notifyPropertyChanged(BR.trackID);
     }
 
-    public void setActivities(String activities) {
-        this.activities = activities;
-        notifyPropertyChanged(BR.activities);
+    public void setActivity(String activity) {
+        this.activity = activity;
+        notifyPropertyChanged(BR.activity);
     }
 
     @Bindable
@@ -57,7 +57,7 @@ public class TrackPoint extends BaseObservable {
     }
 
     @Bindable
-    public String getActivities() {
-        return activities;
+    public String getActivity() {
+        return activity;
     }
 }

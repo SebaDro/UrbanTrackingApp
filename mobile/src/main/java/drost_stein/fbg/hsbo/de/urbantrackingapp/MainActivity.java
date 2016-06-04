@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity
 
     private Intent mLocationServiceIntent;
     private Location mLastLocation;
-    private String mActivityString;
+    private DetectedActivity mLikelyActivity;
     private Menu mMenu;
     private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
@@ -246,12 +246,18 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITIES);
-            String activityString = "";
+            DetectedActivity likelyActivity = null;
             for (DetectedActivity activity : detectedActivities) {
-                activityString += "Activity: " + getDetectedActivity(activity.getType()) + ", Confidence: " + activity.getConfidence() + "%\n";
+                if (likelyActivity == null) {
+                    likelyActivity = activity;
+                } else {
+                    if (likelyActivity.getConfidence() < activity.getConfidence()) {
+                        likelyActivity = activity;
+                    }
+                }
             }
-            mActivityString = activityString;
-            mStartFragment.updatePointActivities(activityString);
+            mLikelyActivity = likelyActivity;
+            mStartFragment.updatePointActivities(getDetectedActivity(likelyActivity.getType()));
         }
     }
 
