@@ -1,6 +1,7 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.content.Context;
+import android.databinding.BaseObservable;
 import android.databinding.DataBindingUtil;
 import android.location.Location;
 import android.net.Uri;
@@ -10,8 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.joda.time.DateTime;
+
 import drost_stein.fbg.hsbo.de.urbantrackingapp.databinding.FragmentStartBinding;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
+import drost_stein.fbg.hsbo.de.urbantrackingapp.viewmodel.StartFragmentViewModel;
 
 
 /**
@@ -22,7 +26,7 @@ import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
  * Use the {@link StartFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class StartFragment extends Fragment {
+public class StartFragment extends Fragment{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -32,8 +36,11 @@ public class StartFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private StartFragmentViewModel startFragmentVM;
+
     private OnFragmentInteractionListener mListener;
-    private TrackPoint mTrackPoint;
+    private TrackPoint mCurrentTrackPoint;
+    private String mCurrentActivity;
 
     public StartFragment() {
         // Required empty public constructor
@@ -72,8 +79,9 @@ public class StartFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         FragmentStartBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_start, container, false);
-        mTrackPoint = new TrackPoint(0, 0, 100);
-        binding.setTrackPoint(mTrackPoint);
+        startFragmentVM=new StartFragmentViewModel();
+        mCurrentTrackPoint = startFragmentVM.getTrackPoint();
+        binding.setStartVM(startFragmentVM);
         // Inflate the layout for this fragment
         // return inflater.inflate(R.layout.fragment_start, container, false);
         return binding.getRoot();
@@ -119,11 +127,13 @@ public class StartFragment extends Fragment {
     }
 
     public void updatePointLocation(Location location) {
-        this.mTrackPoint.setLatitude(location.getLatitude());
-        this.mTrackPoint.setLongitude(location.getLongitude());
+        DateTime time = new DateTime(location.getTime());
+        TrackPoint point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
+                location.getAltitude(), location.getBearing(), location.getAccuracy(), time, mCurrentActivity);
+        startFragmentVM.setTrackPoint(point);
     }
 
-    public void updatePointActivities(String activities) {
-        this.mTrackPoint.setActivity(activities);
+    public void updatePointActivities(String activity) {
+        this.mCurrentActivity = activity;
     }
 }

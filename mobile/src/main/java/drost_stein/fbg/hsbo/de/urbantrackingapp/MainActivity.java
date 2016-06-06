@@ -27,11 +27,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, StartFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
@@ -186,6 +186,10 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * Handles the pressing the GPS-Button action dependent on
+     * whether the GPS was active or not before pressing the button
+     */
     public void handleGPS() {
         if (mGPSActive == false) {
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
@@ -196,7 +200,7 @@ public class MainActivity extends AppCompatActivity
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = false;
             mLocationServiceIntent.putExtra("type", "end");
-            startService(mLocationServiceIntent);
+            stopService(mLocationServiceIntent);
         }
     }
 
@@ -210,6 +214,7 @@ public class MainActivity extends AppCompatActivity
         }
         transaction.commit();
     }
+
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -263,7 +268,7 @@ public class MainActivity extends AppCompatActivity
 
     public String getDetectedActivity(int detectedActivityType) {
         Resources resources = this.getResources();
-        switch(detectedActivityType) {
+        switch (detectedActivityType) {
             case DetectedActivity.IN_VEHICLE:
                 return resources.getString(R.string.in_vehicle);
             case DetectedActivity.ON_BICYCLE:
