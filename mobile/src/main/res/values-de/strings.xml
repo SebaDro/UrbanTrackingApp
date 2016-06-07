@@ -22,13 +22,17 @@
     <string name="txt_trackID">TrackID</string>
     <string name="txt_activity">Activity</string>
 
-    <string name="in_vehicle">In a vehicle</string>
-    <string name="on_bicycle">On a bicycle</string>
-    <string name="on_foot">On foot</string>
-    <string name="running">Running</string>
-    <string name="walking">Walking</string>
-    <string name="still">Still</string>
-    <string name="tilting">Tilting</string>
-    <string name="unknown">Unknown activity</string>
+    <string name="in_vehicle">in einem Fahrzeug</string>
+    <string name="on_bicycle">mit dem Fahrrad</string>
+    <string name="on_foot">Zu Fuß</string>
+    <string name="running">rennend</string>
+    <string name="walking">gehend</string>
+    <string name="still">nicht in Bewegung</string>
+    <string name="tilting">kippend</string>
+    <string name="unknown">Unbekannt</string>
     <string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
+
+    <string name="switchStartTracking">Tracking starten</string>
+    <string name="switchStopTracking">Tracking beenden</string>
+    <string name="lastPosition">Letzte bekannte Position:</string>
 </resources>

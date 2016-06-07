@@ -27,7 +27,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.Switch;
+import android.widget.ToggleButton;
 
+import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
@@ -43,6 +48,7 @@ public class MainActivity extends AppCompatActivity
     private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
+
 
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
@@ -98,6 +104,8 @@ public class MainActivity extends AppCompatActivity
             transaction.hide(mSettingsFragment);
             transaction.commit();
         }
+
+
     }
 
     @Override
@@ -138,6 +146,7 @@ public class MainActivity extends AppCompatActivity
                 NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
                 navigationView.getMenu().getItem(1).setChecked(true);
                 break;
+            /*
             case R.id.action_gps:
                 if (ContextCompat.checkSelfPermission(this,
                         android.Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -150,7 +159,7 @@ public class MainActivity extends AppCompatActivity
                 } else {
                     handleGPS();
                 }
-                break;
+                break;*/
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -202,6 +211,20 @@ public class MainActivity extends AppCompatActivity
             mLocationServiceIntent.putExtra("type", "end");
             stopService(mLocationServiceIntent);
         }
+    }
+
+    public void startTracking(){
+        mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
+        mGPSActive = true;
+        mLocationServiceIntent.putExtra("type", "start");
+        startService(mLocationServiceIntent);
+    }
+
+    public void stopTracking(){
+        mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
+        mGPSActive = false;
+        mLocationServiceIntent.putExtra("type", "end");
+        startService(mLocationServiceIntent);
     }
 
     public void hideAllFragments() {
@@ -262,31 +285,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }
             mLikelyActivity = likelyActivity;
-            mStartFragment.updatePointActivities(getDetectedActivity(likelyActivity.getType()));
+            mStartFragment.updatePointActivities(likelyActivity.getType());
         }
     }
 
-    public String getDetectedActivity(int detectedActivityType) {
-        Resources resources = this.getResources();
-        switch (detectedActivityType) {
-            case DetectedActivity.IN_VEHICLE:
-                return resources.getString(R.string.in_vehicle);
-            case DetectedActivity.ON_BICYCLE:
-                return resources.getString(R.string.on_bicycle);
-            case DetectedActivity.ON_FOOT:
-                return resources.getString(R.string.on_foot);
-            case DetectedActivity.RUNNING:
-                return resources.getString(R.string.running);
-            case DetectedActivity.WALKING:
-                return resources.getString(R.string.walking);
-            case DetectedActivity.STILL:
-                return resources.getString(R.string.still);
-            case DetectedActivity.TILTING:
-                return resources.getString(R.string.tilting);
-            case DetectedActivity.UNKNOWN:
-                return resources.getString(R.string.unknown);
-            default:
-                return resources.getString(R.string.unidentifiable_activity, detectedActivityType);
-        }
-    }
 }

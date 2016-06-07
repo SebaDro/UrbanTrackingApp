@@ -1,6 +1,7 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.databinding.BaseObservable;
 import android.databinding.DataBindingUtil;
 import android.location.Location;
@@ -10,6 +11,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.ImageView;
+import android.widget.Switch;
+import android.widget.TextView;
+
+import com.google.android.gms.location.DetectedActivity;
 
 import org.joda.time.DateTime;
 
@@ -26,7 +33,7 @@ import drost_stein.fbg.hsbo.de.urbantrackingapp.viewmodel.StartFragmentViewModel
  * Use the {@link StartFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class StartFragment extends Fragment{
+public class StartFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -41,6 +48,7 @@ public class StartFragment extends Fragment{
     private OnFragmentInteractionListener mListener;
     private TrackPoint mCurrentTrackPoint;
     private String mCurrentActivity;
+    private Switch mSwitch;
 
     public StartFragment() {
         // Required empty public constructor
@@ -72,6 +80,7 @@ public class StartFragment extends Fragment{
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+
     }
 
     @Override
@@ -79,13 +88,35 @@ public class StartFragment extends Fragment{
                              Bundle savedInstanceState) {
 
         FragmentStartBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_start, container, false);
-        startFragmentVM=new StartFragmentViewModel();
+        View view = binding.getRoot();
+        startFragmentVM = new StartFragmentViewModel();
         mCurrentTrackPoint = startFragmentVM.getTrackPoint();
         binding.setStartVM(startFragmentVM);
-        // Inflate the layout for this fragment
-        // return inflater.inflate(R.layout.fragment_start, container, false);
-        return binding.getRoot();
+
+        mSwitch = (Switch) view.findViewById(R.id.switch_Tracking);
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    handleTrackingSwitchChecked();
+                } else {
+                    handleTrackingSwitchUnChecked();
+                }
+            }
+        });
+        return view;
     }
+
+
+    private void handleTrackingSwitchUnChecked() {
+        mSwitch.setText(R.string.switchStartTracking);
+        ((MainActivity) getActivity()).stopTracking();
+    }
+
+    private void handleTrackingSwitchChecked() {
+        mSwitch.setText(R.string.switchStopTracking);
+        ((MainActivity) getActivity()).startTracking();
+    }
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -133,7 +164,57 @@ public class StartFragment extends Fragment{
         startFragmentVM.setTrackPoint(point);
     }
 
-    public void updatePointActivities(String activity) {
-        this.mCurrentActivity = activity;
+    public void updatePointActivities(int activity) {
+        this.mCurrentActivity = getDetectedActivity(activity);
+    }
+
+    /**
+     * sets the image in the fragment and returns a string representation for the type of the detected activty
+     *
+     * @param detectedActivityType type of the detected activity
+     * @return string representation for the detected activity
+     */
+    public String getDetectedActivity(int detectedActivityType) {
+        Resources resources = this.getResources();
+        ImageView image = (ImageView) getView().findViewById(R.id.activityImage);
+        TextView text=(TextView) getView().findViewById(R.id.activityText);
+        switch (detectedActivityType) {
+            case DetectedActivity.IN_VEHICLE:
+                image.setImageResource(R.drawable.ic_directions_car);
+                text.setText(resources.getString(R.string.in_vehicle));
+                return "IN_VEHICLE";
+            case DetectedActivity.ON_BICYCLE:
+                image.setImageResource(R.drawable.ic_directions_bike);
+                text.setText(resources.getString(R.string.on_bicycle));
+                return "ON_BYCICLE";
+            case DetectedActivity.ON_FOOT:
+                image.setImageResource(R.drawable.ic_directions_walk);
+                text.setText(resources.getString(R.string.on_foot));
+                return "ON_FOOT";
+            case DetectedActivity.RUNNING:
+                image.setImageResource(R.drawable.ic_directions_run);
+                text.setText(resources.getString(R.string.running));
+                return "RUNNING";
+            case DetectedActivity.WALKING:
+                image.setImageResource(R.drawable.ic_directions_walk);
+                text.setText(resources.getString(R.string.walking));
+                return "WALKING";
+            case DetectedActivity.STILL:
+                image.setImageResource(R.drawable.ic_person);
+                text.setText(resources.getString(R.string.still));
+                return "STILL";
+            case DetectedActivity.TILTING:
+                image.setImageResource(R.drawable.ic_screen_rotation);
+                text.setText(resources.getString(R.string.tilting));
+                return "TILTING";
+            case DetectedActivity.UNKNOWN:
+                image.setImageResource(R.drawable.ic_do_not_disturb);
+                text.setText(resources.getString(R.string.unknown));
+                return "UNKNOWN";
+            default:
+                image.setImageResource(R.drawable.ic_do_not_disturb);
+                text.setText(resources.getString(R.string.unknown));
+                return "UNKNOWN";
+        }
     }
 }

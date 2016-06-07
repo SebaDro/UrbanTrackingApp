@@ -30,4 +30,8 @@
     <string name="tilting">Tilting</string>
     <string name="unknown">Unknown activity</string>
     <string name="unidentifiable_activity">Unidentifiable activity: %1$d</string>
+
+    <string name="switchStartTracking">Start Tracking</string>
+    <string name="switchStopTracking">Start Tracking</string>
+    <string name="lastPosition">Last known Position</string>
 </resources>

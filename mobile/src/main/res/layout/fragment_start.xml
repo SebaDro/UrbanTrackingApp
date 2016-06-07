@@ -1,6 +1,7 @@
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <data>
+
         <variable
             name="startVM"
             type="drost_stein.fbg.hsbo.de.urbantrackingapp.viewmodel.StartFragmentViewModel" />
@@ -15,79 +16,120 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+
+            <Switch
+                android:id="@+id/switch_Tracking"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/switchStartTracking"
+                android:textStyle="bold"
+                android:textSize="15dp"
+                android:layout_marginRight="50dp" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/hello_start_fragment" />
+                android:text="@string/lastPosition"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <ImageView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/txt_trackID" />
+                    android:src="@drawable/ic_my_location"
+                    android:layout_marginLeft="10dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{String.valueOf(startVM.trackPoint.trackID)}" />
+                    android:text="@{String.valueOf(startVM.trackPoint.latitude)}"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="50dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=","
+                    android:layout_gravity="center_vertical" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@{String.valueOf(startVM.trackPoint.longitude)}"
+                    android:layout_gravity="center_vertical" />
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
 
-                <TextView
-                    android:layout_width="100dp"
+                <ImageView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/txt_latitude" />
+                    android:src="@drawable/ic_access_time"
+                    android:layout_marginLeft="10dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{String.valueOf(startVM.trackPoint.latitude)}" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="100dp"
-                    android:layout_height="wrap_content"
-                    android:text="@string/txt_longitude" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@{String.valueOf(startVM.trackPoint.longitude)}" />
+                    android:text="@{startVM.trackPoint.time.toString()}"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="50dp" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
+
+                <ImageView
+                    android:id="@+id/activityImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_do_not_disturb"
+                    android:layout_marginLeft="10dp" />
 
                 <TextView
-                    android:layout_width="100dp"
+                    android:id="@+id/activityText"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/txt_activity" />
+                    android:text="@string/unknown"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="50dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="20dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_place"
+                    android:layout_marginLeft="10dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@{String.valueOf(startVM.trackPoint.typeOfMovement)}" />
+                    android:text="immer da, wo was los ist"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="50dp" />
             </LinearLayout>
-
-
         </LinearLayout>
-
 
     </FrameLayout>
 </layout>
