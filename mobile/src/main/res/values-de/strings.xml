@@ -14,9 +14,6 @@
     <string name="action_send">Senden</string>
     <string name="action_share">Teilen</string>
 
-    <string name="hello_start_fragment">Hallo Start Fragment</string>
-    <string name="hello_blank_fragment">Hallo Einstellungen Fragment</string>
-
     <string name="txt_longitude">Longitude</string>
     <string name="txt_latitude">Latitude</string>
     <string name="txt_trackID">TrackID</string>
@@ -35,4 +32,9 @@
     <string name="switchStartTracking">Tracking starten</string>
     <string name="switchStopTracking">Tracking beenden</string>
     <string name="lastPosition">Letzte bekannte Position:</string>
+
+    <string name="update_interval">Erfassungsrate</string>
+    <string name="low_update_interval">Gering</string>
+    <string name="high_update_interval">Hoch</string>
+    <string name="seconds">Sekunden</string>
 </resources>

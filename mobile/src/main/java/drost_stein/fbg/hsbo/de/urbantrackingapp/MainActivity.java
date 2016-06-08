@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
@@ -43,12 +44,13 @@ public class MainActivity extends AppCompatActivity
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
 
-
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
     private static final String BROADCAST_ACTION_ACTIVITIES = PACKAGE_NAME + ".BROADCAST_ACTIVITIES";
     private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
     private static final String EXTENDED_DATA_ACTIVITIES = PACKAGE_NAME + ".DATA_ACTIVITIES";
+
+    public static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -176,24 +178,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     /**
-     * Handles the pressing the GPS-Button action dependent on
-     * whether the GPS was active or not before pressing the button
-     */
-    public void handleTracking() {
-        if (mGPSActive == false) {
-            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
-            mGPSActive = true;
-            mLocationServiceIntent.putExtra("type", "start");
-            startService(mLocationServiceIntent);
-        } else if (mGPSActive == true) {
-            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
-            mGPSActive = false;
-            mLocationServiceIntent.putExtra("type", "end");
-            startService(mLocationServiceIntent);
-        }
-    }
-
-    /**
      * Starts the tracking if the permission was granted
      */
     public void startTracking() {
@@ -209,6 +193,7 @@ public class MainActivity extends AppCompatActivity
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
             mLocationServiceIntent.putExtra("type", "start");
+            mLocationServiceIntent.putExtra("detectionRate", getUpdateIntervalFromPreferences());
             startService(mLocationServiceIntent);
         }
     }
@@ -221,6 +206,12 @@ public class MainActivity extends AppCompatActivity
         mGPSActive = false;
         mLocationServiceIntent.putExtra("type", "end");
         startService(mLocationServiceIntent);
+    }
+
+    public int getUpdateIntervalFromPreferences() {
+        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        int updateInterval = sharedPref.getInt(PREFS_UPDATE_INTERVAL_KEY, 10000);
+        return updateInterval;
     }
 
     public void hideAllFragments() {

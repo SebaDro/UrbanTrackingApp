@@ -3,6 +3,7 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -34,9 +35,13 @@ public class LocationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String type = intent.getStringExtra("type");
+        int detectionRate = intent.getIntExtra("detectionRate", 10000);
+
         if (myLocationListener == null) {
             myLocationListener = new MyLocationListener(this);
         }
+
+        myLocationListener.setDetectionRate(detectionRate);
 
         switch (type) {
             case "start":
@@ -63,8 +68,7 @@ public class LocationService extends IntentService {
         private LocationRequest mLocationRequest;
         private LocationService mLocationService;
 
-        private static final long UPDATE_INTERVAL_MS = 5 * 1000;
-        private static final long FASTEST_INTERVAL_MS = 5 * 1000;
+        private long UPDATE_INTERVAL_MS = 10 * 1000;
 
         public MyLocationListener(LocationService locationService) {
 
@@ -78,6 +82,10 @@ public class LocationService extends IntentService {
                         .addApi(ActivityRecognition.API)
                         .build();
             }
+        }
+
+        public void setDetectionRate(int detectionRate) {
+            UPDATE_INTERVAL_MS = detectionRate;
         }
 
         @Override
@@ -98,12 +106,12 @@ public class LocationService extends IntentService {
             mLocationRequest = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                     .setInterval(UPDATE_INTERVAL_MS)
-                    .setFastestInterval(FASTEST_INTERVAL_MS);
+                    .setFastestInterval(UPDATE_INTERVAL_MS);
 
             LocationServices.FusedLocationApi
                     .requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
             ActivityRecognition.ActivityRecognitionApi
-                    .requestActivityUpdates(mGoogleApiClient, 5000, getActivityDetectionPendingIntent()).setResultCallback(this);
+                    .requestActivityUpdates(mGoogleApiClient, UPDATE_INTERVAL_MS, getActivityDetectionPendingIntent()).setResultCallback(this);
         }
 
         @Override
