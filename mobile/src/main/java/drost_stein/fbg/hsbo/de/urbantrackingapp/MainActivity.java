@@ -40,8 +40,12 @@ import java.util.ArrayList;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, StartFragment.OnFragmentInteractionListener, SettingsFragment.OnFragmentInteractionListener {
+public class MainActivity
+        extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener,
+        StartFragment.OnFragmentInteractionListener,
+        SettingsFragment.OnFragmentInteractionListener,
+        MapFragment.OnFragmentInteractionListener {
 
     private Intent mLocationServiceIntent;
     private Location mLastLocation;
@@ -50,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
+    private MapFragment mMapFragment;
 
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
@@ -102,9 +107,13 @@ public class MainActivity extends AppCompatActivity
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             mStartFragment = new StartFragment();
             mSettingsFragment = new SettingsFragment();
+            mMapFragment = new MapFragment();
+
             transaction.add(R.id.content_frame, mStartFragment, "start_fragment");
             transaction.add(R.id.content_frame, mSettingsFragment, "settings_fragment");
+            transaction.add(R.id.content_frame, mMapFragment, "map_fragment");
             transaction.hide(mSettingsFragment);
+            transaction.hide(mMapFragment);
             transaction.commit();
         }
 
@@ -175,6 +184,9 @@ public class MainActivity extends AppCompatActivity
                 hideAllFragments();
                 transaction.show(mSettingsFragment);
                 break;
+            case R.id.nav_map:
+                hideAllFragments();
+                transaction.show(mMapFragment);
             default:
         }
 
@@ -265,12 +277,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-        /**
-         * gets a string representation for the type of the detected activty
-         *
-         * @param detectedActivityType type of the detected activity
-         * @return string representation for the detected activity
-         */
+    /**
+     * gets a string representation for the type of the detected activty
+     *
+     * @param detectedActivityType type of the detected activity
+     * @return string representation for the detected activity
+     */
     public String getDetectedActivity(int detectedActivityType) {
         switch (detectedActivityType) {
             case DetectedActivity.IN_VEHICLE:
@@ -299,11 +311,11 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             Location location = (Location) intent.getExtras().get(EXTENDED_DATA_LOCATION);
             mLastLocation = location;
-            String activity="UNKNOWN";
-            if (mLikelyActivity!=null){
-               activity=getDetectedActivity(mLikelyActivity.getType());
+            String activity = "UNKNOWN";
+            if (mLikelyActivity != null) {
+                activity = getDetectedActivity(mLikelyActivity.getType());
             }
-            if (mLastLocation != null){
+            if (mLastLocation != null) {
                 DateTime time = new DateTime(location.getTime());
                 TrackPoint point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
                         location.getAltitude(), location.getBearing(), location.getAccuracy(), time, activity);
