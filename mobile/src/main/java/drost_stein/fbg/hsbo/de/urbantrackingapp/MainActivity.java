@@ -241,6 +241,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onStartFragmentStartTracking() {
+        startTracking();
+    }
+
+    @Override
+    public void onStartFragmentStopTracking() {
+        stopTracking();
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case 0: {
@@ -262,7 +272,8 @@ public class MainActivity extends AppCompatActivity
         public void onReceive(Context context, Intent intent) {
             Location location = (Location) intent.getExtras().get(EXTENDED_DATA_LOCATION);
             mLastLocation = location;
-            mStartFragment.updatePointLocation(mLastLocation);
+            if (mLastLocation != null)
+                mStartFragment.updatePointLocation(mLastLocation);
         }
     }
 
@@ -281,7 +292,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }
             mLikelyActivity = likelyActivity;
-            mStartFragment.updatePointActivities(likelyActivity.getType());
+            if (likelyActivity != null)
+                mStartFragment.updatePointActivities(likelyActivity.getType());
         }
     }
 
