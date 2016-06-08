@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,10 +28,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.android.gms.location.DetectedActivity;
 
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
+
+import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
 
 public class MainActivity extends AppCompatActivity
@@ -258,15 +265,53 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+        /**
+         * gets a string representation for the type of the detected activty
+         *
+         * @param detectedActivityType type of the detected activity
+         * @return string representation for the detected activity
+         */
+    public String getDetectedActivity(int detectedActivityType) {
+        switch (detectedActivityType) {
+            case DetectedActivity.IN_VEHICLE:
+                return "IN_VEHICLE";
+            case DetectedActivity.ON_BICYCLE:
+                return "ON_BYCICLE";
+            case DetectedActivity.ON_FOOT:
+                return "ON_FOOT";
+            case DetectedActivity.RUNNING:
+                return "RUNNING";
+            case DetectedActivity.WALKING:
+                return "WALKING";
+            case DetectedActivity.STILL:
+                return "STILL";
+            case DetectedActivity.TILTING:
+                return "TILTING";
+            case DetectedActivity.UNKNOWN:
+                return "UNKNOWN";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     private class LocationResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = (Location) intent.getExtras().get(EXTENDED_DATA_LOCATION);
             mLastLocation = location;
-            if (mLastLocation != null)
-                mStartFragment.updatePointLocation(mLastLocation);
+            String activity="UNKNOWN";
+            if (mLikelyActivity!=null){
+               activity=getDetectedActivity(mLikelyActivity.getType());
+            }
+            if (mLastLocation != null){
+                DateTime time = new DateTime(location.getTime());
+                TrackPoint point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
+                        location.getAltitude(), location.getBearing(), location.getAccuracy(), time, activity);
+                mStartFragment.updatePointLocation(point);
+            }
         }
     }
+
 
     private class ActivitiesResponseReceiver extends BroadcastReceiver {
         @Override

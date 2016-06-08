@@ -16,7 +16,6 @@ import android.widget.TextView;
 
 import com.google.android.gms.location.DetectedActivity;
 
-import org.joda.time.DateTime;
 
 import drost_stein.fbg.hsbo.de.urbantrackingapp.databinding.FragmentStartBinding;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
@@ -102,24 +101,21 @@ public class StartFragment extends Fragment {
         mListener = null;
     }
 
-    public void updatePointLocation(Location location) {
-        DateTime time = new DateTime(location.getTime());
-        TrackPoint point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
-                location.getAltitude(), location.getBearing(), location.getAccuracy(), time, mCurrentActivity);
+    public void updatePointLocation(TrackPoint point) {
         startFragmentVM.setTrackPoint(point);
     }
 
     public void updatePointActivities(int activity) {
-        this.mCurrentActivity = getDetectedActivity(activity);
+        handleDetectedActivity(activity);
     }
 
     /**
-     * sets the image in the fragment and returns a string representation for the type of the detected activty
+     * sets the image and text on the screen for the type of the detected activty
      *
      * @param detectedActivityType type of the detected activity
      * @return string representation for the detected activity
      */
-    public String getDetectedActivity(int detectedActivityType) {
+    public void handleDetectedActivity(int detectedActivityType) {
         Resources resources = this.getResources();
         ImageView image = (ImageView) getView().findViewById(R.id.activityImage);
         TextView text = (TextView) getView().findViewById(R.id.activityText);
@@ -127,39 +123,38 @@ public class StartFragment extends Fragment {
             case DetectedActivity.IN_VEHICLE:
                 image.setImageResource(R.drawable.ic_directions_car);
                 text.setText(resources.getString(R.string.in_vehicle));
-                return "IN_VEHICLE";
+                break;
             case DetectedActivity.ON_BICYCLE:
                 image.setImageResource(R.drawable.ic_directions_bike);
                 text.setText(resources.getString(R.string.on_bicycle));
-                return "ON_BYCICLE";
+                break;
             case DetectedActivity.ON_FOOT:
                 image.setImageResource(R.drawable.ic_directions_walk);
                 text.setText(resources.getString(R.string.on_foot));
-                return "ON_FOOT";
+                break;
             case DetectedActivity.RUNNING:
                 image.setImageResource(R.drawable.ic_directions_run);
                 text.setText(resources.getString(R.string.running));
-                return "RUNNING";
+                break;
             case DetectedActivity.WALKING:
                 image.setImageResource(R.drawable.ic_directions_walk);
                 text.setText(resources.getString(R.string.walking));
-                return "WALKING";
+                break;
             case DetectedActivity.STILL:
                 image.setImageResource(R.drawable.ic_person);
                 text.setText(resources.getString(R.string.still));
-                return "STILL";
+                break;
             case DetectedActivity.TILTING:
                 image.setImageResource(R.drawable.ic_screen_rotation);
                 text.setText(resources.getString(R.string.tilting));
-                return "TILTING";
+                break;
             case DetectedActivity.UNKNOWN:
                 image.setImageResource(R.drawable.ic_do_not_disturb);
                 text.setText(resources.getString(R.string.unknown));
-                return "UNKNOWN";
+                break;
             default:
                 image.setImageResource(R.drawable.ic_do_not_disturb);
                 text.setText(resources.getString(R.string.unknown));
-                return "UNKNOWN";
         }
     }
 
