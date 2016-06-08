@@ -177,7 +177,7 @@ public class StartFragment extends Fragment {
     public String getDetectedActivity(int detectedActivityType) {
         Resources resources = this.getResources();
         ImageView image = (ImageView) getView().findViewById(R.id.activityImage);
-        TextView text=(TextView) getView().findViewById(R.id.activityText);
+        TextView text = (TextView) getView().findViewById(R.id.activityText);
         switch (detectedActivityType) {
             case DetectedActivity.IN_VEHICLE:
                 image.setImageResource(R.drawable.ic_directions_car);

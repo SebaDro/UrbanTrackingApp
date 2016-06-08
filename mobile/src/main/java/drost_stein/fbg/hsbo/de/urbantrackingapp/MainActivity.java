@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -27,12 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
-import android.widget.Switch;
-import android.widget.ToggleButton;
 
-import com.google.android.gms.ads.formats.NativeAd;
 import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
@@ -146,20 +140,6 @@ public class MainActivity extends AppCompatActivity
                 NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
                 navigationView.getMenu().getItem(1).setChecked(true);
                 break;
-            /*
-            case R.id.action_gps:
-                if (ContextCompat.checkSelfPermission(this,
-                        android.Manifest.permission.ACCESS_COARSE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
-                        android.Manifest.permission.ACCESS_FINE_LOCATION)
-                        != PackageManager.PERMISSION_GRANTED) {
-
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
-                } else {
-                    handleGPS();
-                }
-                break;*/
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -199,28 +179,44 @@ public class MainActivity extends AppCompatActivity
      * Handles the pressing the GPS-Button action dependent on
      * whether the GPS was active or not before pressing the button
      */
-    public void handleGPS() {
+    public void handleTracking() {
         if (mGPSActive == false) {
-            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
+            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
             mLocationServiceIntent.putExtra("type", "start");
             startService(mLocationServiceIntent);
         } else if (mGPSActive == true) {
-            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
+            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
             mGPSActive = false;
             mLocationServiceIntent.putExtra("type", "end");
-            stopService(mLocationServiceIntent);
+            startService(mLocationServiceIntent);
         }
     }
 
-    public void startTracking(){
-        mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
-        mGPSActive = true;
-        mLocationServiceIntent.putExtra("type", "start");
-        startService(mLocationServiceIntent);
+    /**
+     * Starts the tracking if the permission was granted
+     */
+    public void startTracking() {
+        if (ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        } else {
+            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
+            mGPSActive = true;
+            mLocationServiceIntent.putExtra("type", "start");
+            startService(mLocationServiceIntent);
+        }
     }
 
-    public void stopTracking(){
+    /**
+     * Stops the tracking
+     */
+    public void stopTracking() {
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
         mGPSActive = false;
         mLocationServiceIntent.putExtra("type", "end");
@@ -252,7 +248,7 @@ public class MainActivity extends AppCompatActivity
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay!
-                    handleGPS();
+                    startTracking();
                 } else {
                     // permission denied, boo!
                 }

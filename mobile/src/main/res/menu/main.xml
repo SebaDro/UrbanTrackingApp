@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/action_gps"
-        android:icon="@drawable/ic_gps_fixed_white_48dp"
+        android:icon="@drawable/ic_gps_off_white_48dp"
         android:title="@string/action_gps"
         app:showAsAction="ifRoom"/>
 
