@@ -32,7 +32,7 @@ public class MapFragment extends Fragment {
     private String mParam2;
 
     private Map map;
-    private MapView mMapView;
+   // private MapView mMapView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -72,17 +72,9 @@ public class MapFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_map, container, false);
-        /*mMapView = (MapView) view.findViewById(R.id.mapView);
-        Map map = new Map(Basemap.Type.STREETS, 51.449169, 7.006742, 10);
-        map.addDoneLoadingListener(new Runnable() {
-            @Override
-            public void run() {
-                Point p=new Point(51.449169, 7.006742, SpatialReferences.getWgs84());
-                Point viewPoint=(Point)GeometryEngine.project(p,SpatialReferences.getWebMercator());
-                mMapView.setViewpointCenterWithScaleAsync(viewPoint,10);
-            }
-        });
-        mMapView.setMap(map);*/
+        MapView mapView = (MapView) view.findViewById(R.id.map);
+        mListener.onMapFragmentGetMapView(mapView);
+
         return view;
     }
 
@@ -123,5 +115,7 @@ public class MapFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+
+        void onMapFragmentGetMapView(MapView mapView);
     }
 }

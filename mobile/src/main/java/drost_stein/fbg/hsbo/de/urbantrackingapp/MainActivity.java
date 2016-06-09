@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,9 +27,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
+import com.esri.android.map.FeatureLayer;
+import com.esri.android.map.MapView;
+import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
+import com.esri.core.map.CallbackListener;
 import com.google.android.gms.location.DetectedActivity;
 
 import org.joda.time.DateTime;
@@ -55,6 +57,9 @@ public class MainActivity
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
     private MapFragment mMapFragment;
+    private MapView mMapView;
+    private GeodatabaseFeatureServiceTable mFeatureServiceTable;
+    private FeatureLayer mTrackPointFeatureLayer;
 
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
@@ -116,8 +121,6 @@ public class MainActivity
             transaction.hide(mMapFragment);
             transaction.commit();
         }
-
-
     }
 
     @Override
@@ -227,6 +230,36 @@ public class MainActivity
         startService(mLocationServiceIntent);
     }
 
+    /**
+     * Adds the Feature-Service for trackpoints to the map
+     */
+    private void addTrackPointFeatureService() {
+        String serviceURL = "http://services6.arcgis.com/RF3oqOe1dChQus9k/arcgis/rest/services/UrbanTrackPoints/FeatureServer";
+        mFeatureServiceTable = new GeodatabaseFeatureServiceTable(serviceURL, 0);
+        mFeatureServiceTable.initialize(
+                new CallbackListener<GeodatabaseFeatureServiceTable.Status>() {
+
+                    @Override
+                    public void onError(Throwable e) {
+                        String error = mFeatureServiceTable.getInitializationError();
+                        Toast toast = Toast.makeText(mMapFragment.getContext(), error, Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+
+                    @Override
+                    public void onCallback(GeodatabaseFeatureServiceTable.Status status) {
+                        if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
+                            mTrackPointFeatureLayer = new FeatureLayer(mFeatureServiceTable);
+                            mMapView.addLayer(mTrackPointFeatureLayer);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * gets the update intervall for position requests
+     * @return update intervall
+     */
     public int getUpdateIntervalFromPreferences() {
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
         int updateInterval = sharedPref.getInt(PREFS_UPDATE_INTERVAL_KEY, 10000);
@@ -251,6 +284,12 @@ public class MainActivity
     }
 
     @Override
+    public void onMapFragmentGetMapView(MapView mapView) {
+        mMapView = mapView;
+        addTrackPointFeatureService();
+    }
+
+    @Override
     public void onStartFragmentStartTracking() {
         startTracking();
     }
@@ -259,6 +298,7 @@ public class MainActivity
     public void onStartFragmentStopTracking() {
         stopTracking();
     }
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
