@@ -8,12 +8,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.esri.arcgisruntime.geometry.GeometryEngine;
-import com.esri.arcgisruntime.geometry.Point;
-import com.esri.arcgisruntime.geometry.SpatialReferences;
-import com.esri.arcgisruntime.mapping.Basemap;
-import com.esri.arcgisruntime.mapping.Map;
-import com.esri.arcgisruntime.mapping.view.MapView;
+import com.esri.android.map.MapView;
+
+import java.util.Map;
 
 
 /**
@@ -75,7 +72,7 @@ public class MapFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_map, container, false);
-        mMapView = (MapView) view.findViewById(R.id.mapView);
+        /*mMapView = (MapView) view.findViewById(R.id.mapView);
         Map map = new Map(Basemap.Type.STREETS, 51.449169, 7.006742, 10);
         map.addDoneLoadingListener(new Runnable() {
             @Override
@@ -85,8 +82,7 @@ public class MapFragment extends Fragment {
                 mMapView.setViewpointCenterWithScaleAsync(viewPoint,10);
             }
         });
-        mMapView.setMap(map);
-
+        mMapView.setMap(map);*/
         return view;
     }
 

@@ -4,10 +4,12 @@
     android:layout_height="match_parent"
     tools:context="drost_stein.fbg.hsbo.de.urbantrackingapp.MapFragment">
 
-    <com.esri.arcgisruntime.mapping.view.MapView
-        android:id="@+id/mapView"
+    <com.esri.android.map.MapView
+        android:id="@+id/map"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" >
-    </com.esri.arcgisruntime.mapping.view.MapView>
+        android:layout_height="fill_parent"
+        mapoptions.MapType="OSM"
+        mapoptions.ZoomLevel="13"
+        mapoptions.center="51.449169, 7.006742" />
 
 </FrameLayout>
