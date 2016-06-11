@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -39,6 +40,7 @@ import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 
+import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
 
@@ -56,10 +58,17 @@ public class MainActivity
     private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
+
     private MapFragment mMapFragment;
     private MapView mMapView;
     private GeodatabaseFeatureServiceTable mFeatureServiceTable;
     private FeatureLayer mTrackPointFeatureLayer;
+
+    private Track currentTrack;
+    private ArrayList<Track> unSyncedTracks;
+
+    private TrackPointSource trackPointsource;
+    private NetworkManager mNetworkManager;
 
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
@@ -121,6 +130,7 @@ public class MainActivity
             transaction.hide(mMapFragment);
             transaction.commit();
         }
+        mNetworkManager=new NetworkManager(ConnectivityManager.TYPE_MOBILE,getApplicationContext());
     }
 
     @Override
@@ -212,6 +222,8 @@ public class MainActivity
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         } else {
+            DateTime startTime=DateTime.now();
+            currentTrack=new Track(1,1,startTime);
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
             mLocationServiceIntent.putExtra("type", "start");
@@ -224,10 +236,17 @@ public class MainActivity
      * Stops the tracking
      */
     public void stopTracking() {
+        DateTime endTime=DateTime.now();
+        currentTrack.setEndTime(endTime);
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
         mGPSActive = false;
         mLocationServiceIntent.putExtra("type", "end");
         startService(mLocationServiceIntent);
+
+        String trackInfo = currentTrack.getTrackPoints().size()+" points have been tracked.";
+        Toast toast = Toast.makeText(mMapFragment.getContext(), trackInfo, Toast.LENGTH_LONG);
+        toast.show();
+
     }
 
     /**
@@ -249,6 +268,7 @@ public class MainActivity
                     @Override
                     public void onCallback(GeodatabaseFeatureServiceTable.Status status) {
                         if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
+                            trackPointsource=new TrackPointSource(mFeatureServiceTable);
                             mTrackPointFeatureLayer = new FeatureLayer(mFeatureServiceTable);
                             mMapView.addLayer(mTrackPointFeatureLayer);
                         }
@@ -359,6 +379,7 @@ public class MainActivity
                 DateTime time = new DateTime(location.getTime());
                 TrackPoint point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
                         location.getAltitude(), location.getBearing(), location.getAccuracy(), time, activity);
+                currentTrack.addTrackPoint(point);
                 mStartFragment.updatePointLocation(point);
             }
         }

@@ -5,6 +5,7 @@ import android.databinding.Bindable;
 
 import org.joda.time.DateTime;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,11 +20,32 @@ public class Track extends BaseObservable {
     private DateTime endTime;
     private List<TrackPoint> trackPoints;
 
+    /**
+     * creates a track in case of starting tracking
+     * @param id id of the track
+     * @param userID id fo the user who is tracking
+     * @param startTime start time of the tracking
+     */
+    public Track(long id, long userID, DateTime startTime) {
+        this.id = id;
+        this.userID = userID;
+        this.startTime = startTime;
+        this.trackPoints = new ArrayList<TrackPoint>();
+    }
+
+    /**
+     * creates a track that is already completed
+     * @param id id of the track
+     * @param userID id fo the user who is tracking
+     * @param startTime start time of the tracking
+     * @param endTime end time of the tracking
+     * @param trackPoints points of the track
+     */
     public Track(long id, long userID, DateTime startTime,DateTime endTime, List<TrackPoint> trackPoints) {
         this.id = id;
         this.userID = userID;
         this.startTime = startTime;
-        this.endTime = endTime;
+        this.endTime=endTime;
         this.trackPoints = trackPoints;
     }
 
@@ -48,9 +70,21 @@ public class Track extends BaseObservable {
         return endTime;
     }
 
+    public void setEndTime(DateTime endTime) {
+        this.endTime = endTime;
+    }
+
     @Bindable
     public List<TrackPoint> getTrackPoints() {
         return trackPoints;
+    }
+
+    /**
+     * adds a track point to the track
+     * @param point
+     */
+    public void addTrackPoint(TrackPoint point){
+        this.trackPoints.add(point);
     }
 
 }
