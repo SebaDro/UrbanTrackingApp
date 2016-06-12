@@ -9,6 +9,10 @@ import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
 
+/**
+ * Service that tracks the activity.
+ * Created by Matthias Stein.
+ */
 public class ActivitiesIntentService extends IntentService {
 
     private static final String TAG = "ActivitiesIntentService";

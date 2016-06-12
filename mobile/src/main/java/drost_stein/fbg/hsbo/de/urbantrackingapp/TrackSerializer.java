@@ -1,7 +1,5 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
-
-
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 

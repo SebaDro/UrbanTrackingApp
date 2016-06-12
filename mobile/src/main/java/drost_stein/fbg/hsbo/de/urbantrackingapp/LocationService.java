@@ -21,6 +21,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+/**
+ * Service that controls the tracking
+ * Created by Matthias Stein.
+ */
 public class LocationService extends IntentService {
 
     private static MyLocationListener myLocationListener;
