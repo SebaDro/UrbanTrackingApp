@@ -5,7 +5,6 @@ import android.databinding.Bindable;
 
 import org.joda.time.DateTime;
 
-import drost_stein.fbg.hsbo.de.urbantrackingapp.BR;
 
 /**
  * It represents the user's position at a specific time and is part of a track.

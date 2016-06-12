@@ -35,6 +35,10 @@ import com.esri.android.map.MapView;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
 import com.esri.core.map.CallbackListener;
 import com.google.android.gms.location.DetectedActivity;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.joda.time.DateTime;
 
@@ -69,6 +73,7 @@ public class MainActivity
 
     private TrackPointSource trackPointsource;
     private NetworkManager mNetworkManager;
+    private GsonBuilder gsonBuilder;
 
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
@@ -131,6 +136,10 @@ public class MainActivity
             transaction.commit();
         }
         mNetworkManager=new NetworkManager(ConnectivityManager.TYPE_MOBILE,getApplicationContext());
+        gsonBuilder =new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Track.class,new TrackSerializer());
+        gsonBuilder.registerTypeAdapter(Track.class,new TrackDeserializer());
+        JodaTimeAndroid.init(this);
     }
 
     @Override
@@ -243,7 +252,12 @@ public class MainActivity
         mLocationServiceIntent.putExtra("type", "end");
         startService(mLocationServiceIntent);
 
-        String trackInfo = currentTrack.getTrackPoints().size()+" points have been tracked.";
+        Gson gson=gsonBuilder.create();
+        String jsonTrack=gson.toJson(currentTrack);
+
+        Track track=gson.fromJson(jsonTrack,Track.class);
+
+        String trackInfo = track.getTrackPoints().size()+" points have been tracked.";
         Toast toast = Toast.makeText(mMapFragment.getContext(), trackInfo, Toast.LENGTH_LONG);
         toast.show();
 
