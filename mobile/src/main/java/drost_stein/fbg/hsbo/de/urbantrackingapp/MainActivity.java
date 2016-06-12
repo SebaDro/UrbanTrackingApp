@@ -37,11 +37,13 @@ import com.esri.core.map.CallbackListener;
 import com.google.android.gms.location.DetectedActivity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 
 import net.danlew.android.joda.JodaTimeAndroid;
 
 import org.joda.time.DateTime;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
@@ -135,10 +137,11 @@ public class MainActivity
             transaction.hide(mMapFragment);
             transaction.commit();
         }
-        mNetworkManager=new NetworkManager(ConnectivityManager.TYPE_MOBILE,getApplicationContext());
-        gsonBuilder =new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Track.class,new TrackSerializer());
-        gsonBuilder.registerTypeAdapter(Track.class,new TrackDeserializer());
+        mNetworkManager = new NetworkManager(ConnectivityManager.TYPE_MOBILE, getApplicationContext());
+        gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Track.class, new TrackSerializer());
+        gsonBuilder.registerTypeAdapter(Track.class, new TrackDeserializer());
+
         JodaTimeAndroid.init(this);
     }
 
@@ -231,8 +234,8 @@ public class MainActivity
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         } else {
-            DateTime startTime=DateTime.now();
-            currentTrack=new Track(1,1,startTime);
+            DateTime startTime = DateTime.now();
+            currentTrack = new Track(1, 1, startTime);
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
             mLocationServiceIntent.putExtra("type", "start");
@@ -245,19 +248,22 @@ public class MainActivity
      * Stops the tracking
      */
     public void stopTracking() {
-        DateTime endTime=DateTime.now();
+        DateTime endTime = DateTime.now();
         currentTrack.setEndTime(endTime);
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
         mGPSActive = false;
         mLocationServiceIntent.putExtra("type", "end");
         startService(mLocationServiceIntent);
 
-        Gson gson=gsonBuilder.create();
-        String jsonTrack=gson.toJson(currentTrack);
-
-        Track track=gson.fromJson(jsonTrack,Track.class);
-
-        String trackInfo = track.getTrackPoints().size()+" points have been tracked.";
+        if (mNetworkManager.isOnline()) {
+            //TODO uploading tracks
+        } else {
+            if (unSyncedTracks == null) {
+                unSyncedTracks = new ArrayList<Track>();
+            }
+            unSyncedTracks.add(currentTrack);
+        }
+        String trackInfo = currentTrack.getTrackPoints().size() + " points have been tracked.";
         Toast toast = Toast.makeText(mMapFragment.getContext(), trackInfo, Toast.LENGTH_LONG);
         toast.show();
 
@@ -282,7 +288,7 @@ public class MainActivity
                     @Override
                     public void onCallback(GeodatabaseFeatureServiceTable.Status status) {
                         if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
-                            trackPointsource=new TrackPointSource(mFeatureServiceTable);
+                            trackPointsource = new TrackPointSource(mFeatureServiceTable);
                             mTrackPointFeatureLayer = new FeatureLayer(mFeatureServiceTable);
                             mMapView.addLayer(mTrackPointFeatureLayer);
                         }
@@ -292,6 +298,7 @@ public class MainActivity
 
     /**
      * gets the update intervall for position requests
+     *
      * @return update intervall
      */
     public int getUpdateIntervalFromPreferences() {
@@ -348,6 +355,37 @@ public class MainActivity
                 }
                 return;
             }
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Gson gson = gsonBuilder.create();
+        String jsonTracks = gson.toJson(unSyncedTracks);
+
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.preference_file_key_tracks), jsonTracks);
+        editor.commit();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
+
+        String jsonTracks = sharedPref.getString(getString(R.string.preference_file_key_tracks), null);
+        if (jsonTracks != null) {
+            Gson gson = gsonBuilder.create();
+            Type collectionType = new TypeToken<ArrayList<Track>>() {
+            }.getType();
+            unSyncedTracks = gson.fromJson(jsonTracks, collectionType);
+
+            String info = unSyncedTracks.size() + " tracks have been restored.";
+            Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
+            toast.show();
         }
     }
 
