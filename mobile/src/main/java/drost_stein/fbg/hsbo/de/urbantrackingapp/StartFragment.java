@@ -111,6 +111,7 @@ public class StartFragment extends Fragment {
 
     /**
      * sets the image and text on the screen for the type of the detected activty
+     *
      * @param detectedActivityType type of the detected activity
      */
     public void handleDetectedActivity(int detectedActivityType) {

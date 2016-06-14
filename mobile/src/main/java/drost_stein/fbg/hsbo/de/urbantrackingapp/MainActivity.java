@@ -297,9 +297,9 @@ public class MainActivity
     }
 
     /**
-     * gets the update intervall for position requests
+     * gets the update interval for position requests
      *
-     * @return update intervall
+     * @return update interval
      */
     public int getUpdateIntervalFromPreferences() {
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
