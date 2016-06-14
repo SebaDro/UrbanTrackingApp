@@ -3,7 +3,6 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -39,13 +38,13 @@ public class LocationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         String type = intent.getStringExtra("type");
-        int detectionRate = intent.getIntExtra("detectionRate", 10000);
+        int updateInterval = intent.getIntExtra("updateInterval", 10000);
 
         if (myLocationListener == null) {
             myLocationListener = new MyLocationListener(this);
         }
 
-        myLocationListener.setDetectionRate(detectionRate);
+        myLocationListener.setUpdateInterval(updateInterval);
 
         switch (type) {
             case "start":
@@ -88,8 +87,8 @@ public class LocationService extends IntentService {
             }
         }
 
-        public void setDetectionRate(int detectionRate) {
-            UPDATE_INTERVAL_MS = detectionRate;
+        public void setUpdateInterval(int updateInterval) {
+            UPDATE_INTERVAL_MS = updateInterval;
         }
 
         @Override

@@ -21,7 +21,7 @@ import android.widget.Toast;
 public class SettingsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
-    private SeekBar mupdateIntervalSeekBar;
+    private SeekBar mUpdateIntervalSeekBar;
     private int seekBarMax = 60000;
     private int seekBarMin = 5000;
     public static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
@@ -41,13 +41,13 @@ public class SettingsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        mupdateIntervalSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        mUpdateIntervalSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
 
-        mupdateIntervalSeekBar.setMax(seekBarMax - seekBarMin);
+        mUpdateIntervalSeekBar.setMax(seekBarMax - seekBarMin);
 
-        mupdateIntervalSeekBar.setProgress(getUpdateIntervalFromPreferences());
+        mUpdateIntervalSeekBar.setProgress(getUpdateIntervalFromPreferences());
 
-        mupdateIntervalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        mUpdateIntervalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int updateInterval = 0;
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {

@@ -239,7 +239,7 @@ public class MainActivity
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
             mLocationServiceIntent.putExtra("type", "start");
-            mLocationServiceIntent.putExtra("detectionRate", getUpdateIntervalFromPreferences());
+            mLocationServiceIntent.putExtra("updateInterval", getUpdateIntervalFromPreferences());
             startService(mLocationServiceIntent);
         }
     }
