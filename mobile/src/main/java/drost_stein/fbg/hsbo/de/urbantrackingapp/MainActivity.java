@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.ConnectivityManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -34,14 +33,11 @@ import com.esri.android.map.FeatureLayer;
 import com.esri.android.map.MapView;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
 import com.esri.core.map.CallbackListener;
-import com.google.android.gms.location.DetectedActivity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
 import net.danlew.android.joda.JodaTimeAndroid;
-
-import org.joda.time.DateTime;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -59,7 +55,7 @@ public class MainActivity
 
     private Intent mLocationServiceIntent;
     private Location mLastLocation;
-    private DetectedActivity mLikelyActivity;
+
     private Menu mMenu;
     private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
@@ -70,7 +66,7 @@ public class MainActivity
     private GeodatabaseFeatureServiceTable mFeatureServiceTable;
     private FeatureLayer mTrackPointFeatureLayer;
 
-    private Track currentTrack;
+
     private ArrayList<Track> unSyncedTracks;
 
     private TrackPointSource trackPointsource;
@@ -79,9 +75,10 @@ public class MainActivity
 
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
-    private static final String BROADCAST_ACTION_ACTIVITIES = PACKAGE_NAME + ".BROADCAST_ACTIVITIES";
+
     private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
-    private static final String EXTENDED_DATA_ACTIVITIES = PACKAGE_NAME + ".DATA_ACTIVITIES";
+    private static final String BROADCAST_ACTION_TRACK=PACKAGE_NAME + ".BROADCAST_TRACK";
+    private static final String EXTENDED_DATA_TRACK=PACKAGE_NAME + ".DATA_TRACK";
 
     public static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
 
@@ -95,15 +92,16 @@ public class MainActivity
 
         mLocationServiceIntent = new Intent(Intent.ACTION_SYNC, null, this, LocationService.class);
 
-        LocationResponseReceiver locationResponseReceiver = new LocationResponseReceiver();
-        IntentFilter intentFilter1 = new IntentFilter(BROADCAST_ACTION_LOCATION);
+        TrackPointResponseReceiver trackPointResponseReceiver = new TrackPointResponseReceiver();
+        IntentFilter trackPointIntentFilter = new IntentFilter(BROADCAST_ACTION_LOCATION);
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                locationResponseReceiver, intentFilter1);
+                trackPointResponseReceiver, trackPointIntentFilter);
 
-        ActivitiesResponseReceiver activitiesResponseReceiver = new ActivitiesResponseReceiver();
-        IntentFilter intentFilter2 = new IntentFilter(BROADCAST_ACTION_ACTIVITIES);
+        TrackResponseReceiver trackResponseReceiver=new TrackResponseReceiver();
+        IntentFilter trackIntentFilter = new IntentFilter(BROADCAST_ACTION_TRACK);
         LocalBroadcastManager.getInstance(this).registerReceiver(
-                activitiesResponseReceiver, intentFilter2);
+                trackResponseReceiver, trackIntentFilter);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -234,8 +232,6 @@ public class MainActivity
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         } else {
-            DateTime startTime = DateTime.now();
-            currentTrack = new Track(1, 1, startTime);
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
             mLocationServiceIntent.putExtra("type", "start");
@@ -248,25 +244,10 @@ public class MainActivity
      * Stops the tracking
      */
     public void stopTracking() {
-        DateTime endTime = DateTime.now();
-        currentTrack.setEndTime(endTime);
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
         mGPSActive = false;
         mLocationServiceIntent.putExtra("type", "end");
         startService(mLocationServiceIntent);
-
-        if (mNetworkManager.isOnline()) {
-            //TODO uploading tracks
-        } else {
-            if (unSyncedTracks == null) {
-                unSyncedTracks = new ArrayList<Track>();
-            }
-            unSyncedTracks.add(currentTrack);
-        }
-        String trackInfo = currentTrack.getTrackPoints().size() + " points have been tracked.";
-        Toast toast = Toast.makeText(mMapFragment.getContext(), trackInfo, Toast.LENGTH_LONG);
-        toast.show();
-
     }
 
     /**
@@ -318,11 +299,6 @@ public class MainActivity
         transaction.commit();
     }
 
-
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
 
     @Override
     public void onMapFragmentGetMapView(MapView mapView) {
@@ -389,73 +365,31 @@ public class MainActivity
         }
     }
 
-    /**
-     * gets a string representation for the type of the detected activty
-     *
-     * @param detectedActivityType type of the detected activity
-     * @return string representation for the detected activity
-     */
-    public String getDetectedActivity(int detectedActivityType) {
-        switch (detectedActivityType) {
-            case DetectedActivity.IN_VEHICLE:
-                return "IN_VEHICLE";
-            case DetectedActivity.ON_BICYCLE:
-                return "ON_BYCICLE";
-            case DetectedActivity.ON_FOOT:
-                return "ON_FOOT";
-            case DetectedActivity.RUNNING:
-                return "RUNNING";
-            case DetectedActivity.WALKING:
-                return "WALKING";
-            case DetectedActivity.STILL:
-                return "STILL";
-            case DetectedActivity.TILTING:
-                return "TILTING";
-            case DetectedActivity.UNKNOWN:
-                return "UNKNOWN";
-            default:
-                return "UNKNOWN";
+
+    private class TrackPointResponseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            TrackPoint point = (TrackPoint) intent.getExtras().get(EXTENDED_DATA_LOCATION);
+
+            mStartFragment.updateTrackPoint(point);
         }
     }
 
-    private class LocationResponseReceiver extends BroadcastReceiver {
+    private class TrackResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Location location = (Location) intent.getExtras().get(EXTENDED_DATA_LOCATION);
-            mLastLocation = location;
-            String activity = "UNKNOWN";
-            if (mLikelyActivity != null) {
-                activity = getDetectedActivity(mLikelyActivity.getType());
-            }
-            if (mLastLocation != null) {
-                DateTime time = new DateTime(location.getTime());
-                TrackPoint point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
-                        location.getAltitude(), location.getBearing(), location.getAccuracy(), time, activity);
-                currentTrack.addTrackPoint(point);
-                mStartFragment.updatePointLocation(point);
-            }
-        }
-    }
-
-
-    private class ActivitiesResponseReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITIES);
-            DetectedActivity likelyActivity = null;
-            for (DetectedActivity activity : detectedActivities) {
-                if (likelyActivity == null) {
-                    likelyActivity = activity;
-                } else {
-                    if (likelyActivity.getConfidence() < activity.getConfidence()) {
-                        likelyActivity = activity;
-                    }
+            Track track = (Track) intent.getExtras().get(EXTENDED_DATA_TRACK);
+            if (mNetworkManager.isOnline()) {
+                //TODO uploading tracks
+            } else {
+                if (unSyncedTracks == null) {
+                    unSyncedTracks = new ArrayList<Track>();
                 }
+                unSyncedTracks.add(track);
             }
-            mLikelyActivity = likelyActivity;
-            if (likelyActivity != null)
-                mStartFragment.updatePointActivities(likelyActivity.getType());
+            String trackInfo = track.getTrackPoints().size() + " points have been tracked.";
+            Toast toast = Toast.makeText(mMapFragment.getContext(), trackInfo, Toast.LENGTH_LONG);
+            toast.show();
         }
     }
-
 }

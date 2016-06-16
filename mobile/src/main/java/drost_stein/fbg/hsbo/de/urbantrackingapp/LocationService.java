@@ -2,7 +2,10 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -16,9 +19,17 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+
+import org.joda.time.DateTime;
+
+import java.util.ArrayList;
+
+import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
+import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
 /**
  * Service that controls the tracking
@@ -30,6 +41,13 @@ public class LocationService extends IntentService {
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
     private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
+    private static final String EXTENDED_DATA_ACTIVITIES = PACKAGE_NAME + ".DATA_ACTIVITIES";
+    private static final String BROADCAST_ACTION_ACTIVITIES = PACKAGE_NAME + ".BROADCAST_ACTIVITIES";
+    private static final String BROADCAST_ACTION_TRACK=PACKAGE_NAME + ".BROADCAST_TRACK";
+    private static final String EXTENDED_DATA_TRACK=PACKAGE_NAME + ".DATA_TRACK";
+
+    private Track mCurrentTrack;
+    private DetectedActivity mCurrentActivity;
 
     public LocationService() {
         super("Location Service");
@@ -48,19 +66,37 @@ public class LocationService extends IntentService {
 
         switch (type) {
             case "start":
+                ActivitiesResponseReceiver activitiesResponseReceiver = new ActivitiesResponseReceiver();
+                IntentFilter activityIntentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITIES);
+                LocalBroadcastManager.getInstance(this).registerReceiver(
+                        activitiesResponseReceiver, activityIntentFilter);
+                DateTime startTime = DateTime.now();
+                mCurrentTrack = new Track(1, 1, startTime);
                 myLocationListener.startLocationUpdates();
                 break;
             case "end":
                 myLocationListener.stopLocationUpdates();
+                DateTime endTime = DateTime.now();
+                mCurrentTrack.setEndTime(endTime);
+                sendTrack(mCurrentTrack);
             default:
         }
     }
 
-    public void sendLocation(Location location) {
+    public void sendTrackPoint(TrackPoint point) {
         Intent localIntent =
                 new Intent(BROADCAST_ACTION_LOCATION)
                         // Puts the location into the Intent
-                        .putExtra(EXTENDED_DATA_LOCATION, location);
+                        .putExtra(EXTENDED_DATA_LOCATION, point);
+        // Broadcasts the Intent to receivers in this app.
+        LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
+    public void sendTrack(Track track) {
+        Intent localIntent =
+                new Intent(BROADCAST_ACTION_TRACK)
+                        // Puts the location into the Intent
+                        .putExtra(EXTENDED_DATA_TRACK, track);
         // Broadcasts the Intent to receivers in this app.
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
@@ -130,7 +166,18 @@ public class LocationService extends IntentService {
         @Override
         public void onLocationChanged(Location location) {
             mLastLocation = location;
-            mLocationService.sendLocation(location);
+            String activity = "UNKNOWN";
+            TrackPoint point=null;
+            if (mCurrentActivity != null) {
+                activity = getDetectedActivity(mCurrentActivity.getType());
+            }
+            if (mLastLocation != null) {
+                DateTime time = new DateTime(location.getTime());
+                point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
+                        location.getAltitude(), location.getBearing(), location.getAccuracy(), time, activity);
+                mCurrentTrack.addTrackPoint(point);
+            }
+            mLocationService.sendTrackPoint(point);
         }
 
         public void onResult(Status status) {
@@ -156,6 +203,53 @@ public class LocationService extends IntentService {
         private PendingIntent getActivityDetectionPendingIntent() {
             Intent intent = new Intent(getBaseContext(), ActivitiesIntentService.class);
             return PendingIntent.getService(getBaseContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
+        /**
+         * gets a string representation for the type of the detected activty
+         *
+         * @param detectedActivityType type of the detected activity
+         * @return string representation for the detected activity
+         */
+        public String getDetectedActivity(int detectedActivityType) {
+            switch (detectedActivityType) {
+                case DetectedActivity.IN_VEHICLE:
+                    return "IN_VEHICLE";
+                case DetectedActivity.ON_BICYCLE:
+                    return "ON_BYCICLE";
+                case DetectedActivity.ON_FOOT:
+                    return "ON_FOOT";
+                case DetectedActivity.RUNNING:
+                    return "RUNNING";
+                case DetectedActivity.WALKING:
+                    return "WALKING";
+                case DetectedActivity.STILL:
+                    return "STILL";
+                case DetectedActivity.TILTING:
+                    return "TILTING";
+                case DetectedActivity.UNKNOWN:
+                    return "UNKNOWN";
+                default:
+                    return "UNKNOWN";
+            }
+        }
+    }
+
+    private class ActivitiesResponseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITIES);
+            DetectedActivity likelyActivity = null;
+            for (DetectedActivity activity : detectedActivities) {
+                if (likelyActivity == null) {
+                    likelyActivity = activity;
+                } else {
+                    if (likelyActivity.getConfidence() < activity.getConfidence()) {
+                        likelyActivity = activity;
+                    }
+                }
+            }
+            mCurrentActivity = likelyActivity;
         }
     }
 }

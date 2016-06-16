@@ -5,6 +5,7 @@ import android.databinding.Bindable;
 
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  * several TrackPoints.
  * Created by Sebastian Drost on 04.06.2016.
  */
-public class Track extends BaseObservable {
+public class Track extends BaseObservable implements Serializable{
     private long id;
     private long userID;
     private DateTime startTime;

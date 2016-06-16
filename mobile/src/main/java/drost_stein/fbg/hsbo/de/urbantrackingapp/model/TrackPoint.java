@@ -5,12 +5,14 @@ import android.databinding.Bindable;
 
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
+
 
 /**
  * It represents the user's position at a specific time and is part of a track.
  * Created by Sebastian Drost on 28.05.2016.
  */
-public class TrackPoint extends BaseObservable {
+public class TrackPoint extends BaseObservable implements Serializable {
 
     private long id;
     private long trackID;

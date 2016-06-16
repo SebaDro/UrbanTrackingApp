@@ -106,7 +106,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="50dp"
-                    android:text="@string/unknown" />
+                    android:text="@{startVM.trackPoint.typeOfMovement}" />
 
             </LinearLayout>
 
