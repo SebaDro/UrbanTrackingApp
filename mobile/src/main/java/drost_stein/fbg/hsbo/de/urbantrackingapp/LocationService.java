@@ -1,7 +1,7 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
-import android.app.IntentService;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +9,10 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -35,27 +39,32 @@ import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
  * Service that controls the tracking
  * Created by Matthias Stein.
  */
-public class LocationService extends IntentService {
+public class LocationService extends Service {
 
     private static MyLocationListener myLocationListener;
     public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
-    private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
-    private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
-    private static final String EXTENDED_DATA_ACTIVITIES = PACKAGE_NAME + ".DATA_ACTIVITIES";
-    private static final String BROADCAST_ACTION_ACTIVITIES = PACKAGE_NAME + ".BROADCAST_ACTIVITIES";
-    private static final String BROADCAST_ACTION_TRACK=PACKAGE_NAME + ".BROADCAST_TRACK";
-    private static final String EXTENDED_DATA_TRACK=PACKAGE_NAME + ".DATA_TRACK";
+    private static final String BROADCAST_ACTION_TRACK_POINT = PACKAGE_NAME + ".BROADCAST_TRACK_POINT";
+    private static final String EXTENDED_DATA_TRACK_POINT = PACKAGE_NAME + ".DATA_TRACK_POINT";
+    private static final String BROADCAST_ACTION_ACTIVITY = PACKAGE_NAME + ".BROADCAST_ACTIVITY";
+    private static final String EXTENDED_DATA_ACTIVITY = PACKAGE_NAME + ".DATA_ACTIVITY";
+    private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
+    private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
 
     private Track mCurrentTrack;
     private DetectedActivity mCurrentActivity;
 
-    public LocationService() {
-        super("Location Service");
+    private Looper mServiceLooper;
+    private ServiceHandler mServiceHandler;
+
+    // Handler that receives messages from the thread
+    private final class ServiceHandler extends Handler {
+        public ServiceHandler(Looper looper) {
+            super(looper);
+        }
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        String type = intent.getStringExtra("type");
+    public int onStartCommand(Intent intent, int flags, int startId) {
         int updateInterval = intent.getIntExtra("updateInterval", 10000);
 
         if (myLocationListener == null) {
@@ -64,30 +73,40 @@ public class LocationService extends IntentService {
 
         myLocationListener.setUpdateInterval(updateInterval);
 
-        switch (type) {
-            case "start":
-                ActivitiesResponseReceiver activitiesResponseReceiver = new ActivitiesResponseReceiver();
-                IntentFilter activityIntentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITIES);
-                LocalBroadcastManager.getInstance(this).registerReceiver(
-                        activitiesResponseReceiver, activityIntentFilter);
-                DateTime startTime = DateTime.now();
-                mCurrentTrack = new Track(1, 1, startTime);
-                myLocationListener.startLocationUpdates();
-                break;
-            case "end":
-                myLocationListener.stopLocationUpdates();
-                DateTime endTime = DateTime.now();
-                mCurrentTrack.setEndTime(endTime);
-                sendTrack(mCurrentTrack);
-            default:
-        }
+        ActivitiesResponseReceiver activitiesResponseReceiver = new ActivitiesResponseReceiver();
+        IntentFilter activityIntentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                activitiesResponseReceiver, activityIntentFilter);
+        DateTime startTime = DateTime.now();
+        mCurrentTrack = new Track(1, 1, startTime);
+        myLocationListener.startLocationUpdates();
+
+        return Service.START_REDELIVER_INTENT;
+    }
+
+    @Override
+    public void onCreate() {
+    }
+
+    @Override
+    public IBinder onBind(Intent arg0) {
+        // We don't provide binding, so return null
+        return null;
+    }
+
+    @Override
+    public void onDestroy() {
+        myLocationListener.stopLocationUpdates();
+        DateTime endTime = DateTime.now();
+        mCurrentTrack.setEndTime(endTime);
+        sendTrack(mCurrentTrack);
     }
 
     public void sendTrackPoint(TrackPoint point) {
         Intent localIntent =
-                new Intent(BROADCAST_ACTION_LOCATION)
+                new Intent(BROADCAST_ACTION_TRACK_POINT)
                         // Puts the location into the Intent
-                        .putExtra(EXTENDED_DATA_LOCATION, point);
+                        .putExtra(EXTENDED_DATA_TRACK_POINT, point);
         // Broadcasts the Intent to receivers in this app.
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
     }
@@ -167,7 +186,7 @@ public class LocationService extends IntentService {
         public void onLocationChanged(Location location) {
             mLastLocation = location;
             String activity = "UNKNOWN";
-            TrackPoint point=null;
+            TrackPoint point = null;
             if (mCurrentActivity != null) {
                 activity = getDetectedActivity(mCurrentActivity.getType());
             }
@@ -238,7 +257,7 @@ public class LocationService extends IntentService {
     private class ActivitiesResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITIES);
+            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITY);
             DetectedActivity likelyActivity = null;
             for (DetectedActivity activity : detectedActivities) {
                 if (likelyActivity == null) {

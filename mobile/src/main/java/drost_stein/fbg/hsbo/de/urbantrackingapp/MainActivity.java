@@ -73,13 +73,11 @@ public class MainActivity
     private NetworkManager mNetworkManager;
     private GsonBuilder gsonBuilder;
 
-    public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
-    private static final String BROADCAST_ACTION_LOCATION = PACKAGE_NAME + ".BROADCAST_LOCATION";
-
-    private static final String EXTENDED_DATA_LOCATION = PACKAGE_NAME + ".DATA_LOCATION";
-    private static final String BROADCAST_ACTION_TRACK=PACKAGE_NAME + ".BROADCAST_TRACK";
-    private static final String EXTENDED_DATA_TRACK=PACKAGE_NAME + ".DATA_TRACK";
-
+    private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String BROADCAST_ACTION_TRACK_POINT = PACKAGE_NAME + ".BROADCAST_TRACK_POINT";
+    private static final String EXTENDED_DATA_TRACK_POINT = PACKAGE_NAME + ".DATA_TRACK_POINT";
+    private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
+    private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
     public static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
 
     @Override
@@ -93,11 +91,11 @@ public class MainActivity
         mLocationServiceIntent = new Intent(Intent.ACTION_SYNC, null, this, LocationService.class);
 
         TrackPointResponseReceiver trackPointResponseReceiver = new TrackPointResponseReceiver();
-        IntentFilter trackPointIntentFilter = new IntentFilter(BROADCAST_ACTION_LOCATION);
+        IntentFilter trackPointIntentFilter = new IntentFilter(BROADCAST_ACTION_TRACK_POINT);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 trackPointResponseReceiver, trackPointIntentFilter);
 
-        TrackResponseReceiver trackResponseReceiver=new TrackResponseReceiver();
+        TrackResponseReceiver trackResponseReceiver = new TrackResponseReceiver();
         IntentFilter trackIntentFilter = new IntentFilter(BROADCAST_ACTION_TRACK);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 trackResponseReceiver, trackIntentFilter);
@@ -234,7 +232,7 @@ public class MainActivity
         } else {
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
-            mLocationServiceIntent.putExtra("type", "start");
+            //mLocationServiceIntent.putExtra("type", "start");
             mLocationServiceIntent.putExtra("updateInterval", getUpdateIntervalFromPreferences());
             startService(mLocationServiceIntent);
         }
@@ -246,8 +244,8 @@ public class MainActivity
     public void stopTracking() {
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
         mGPSActive = false;
-        mLocationServiceIntent.putExtra("type", "end");
-        startService(mLocationServiceIntent);
+        //mLocationServiceIntent.putExtra("type", "end");
+        stopService(mLocationServiceIntent);
     }
 
     /**
@@ -359,9 +357,9 @@ public class MainActivity
             }.getType();
             unSyncedTracks = gson.fromJson(jsonTracks, collectionType);
 
-            String info = unSyncedTracks.size() + " tracks have been restored.";
-            Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
-            toast.show();
+            //String info = unSyncedTracks.size() + " tracks have been restored.";
+            //Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
+            //toast.show();
         }
     }
 
@@ -369,7 +367,7 @@ public class MainActivity
     private class TrackPointResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            TrackPoint point = (TrackPoint) intent.getExtras().get(EXTENDED_DATA_LOCATION);
+            TrackPoint point = (TrackPoint) intent.getExtras().get(EXTENDED_DATA_TRACK_POINT);
 
             mStartFragment.updateTrackPoint(point);
         }
