@@ -1,6 +1,7 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -297,11 +298,27 @@ public class MainActivity
         transaction.commit();
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     @Override
     public void onMapFragmentGetMapView(MapView mapView) {
         mMapView = mapView;
         addTrackPointFeatureService();
+    }
+
+    @Override
+    public void onStartFragmentStarted() {
+        if (isMyServiceRunning(LocationService.class)) {
+            mStartFragment.enableSwitch();
+        }
     }
 
     @Override

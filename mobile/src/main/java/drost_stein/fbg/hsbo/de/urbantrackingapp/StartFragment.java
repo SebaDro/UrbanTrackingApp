@@ -3,7 +3,6 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 import android.content.Context;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
-import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -13,8 +12,6 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
-
-import com.google.android.gms.location.DetectedActivity;
 
 
 import drost_stein.fbg.hsbo.de.urbantrackingapp.databinding.FragmentStartBinding;
@@ -34,7 +31,6 @@ public class StartFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private TrackPoint mCurrentTrackPoint;
-    private String mCurrentActivity;
     private Switch mSwitch;
 
     public StartFragment() {
@@ -66,7 +62,24 @@ public class StartFragment extends Fragment {
                 }
             }
         });
+        if (mListener != null) {
+            mListener.onStartFragmentStarted();
+        }
         return view;
+    }
+
+    public void enableSwitch() {
+        mSwitch.setOnCheckedChangeListener (null);
+        mSwitch.setChecked(true);
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    handleTrackingSwitchChecked();
+                } else {
+                    handleTrackingSwitchUnChecked();
+                }
+            }
+        });
     }
 
 
@@ -112,45 +125,47 @@ public class StartFragment extends Fragment {
      * @param typeOfMovement type of the detected activity
      */
     public void handleDetectedActivity(String typeOfMovement) {
-        Resources resources = this.getResources();
-        ImageView image = (ImageView) getView().findViewById(R.id.activityImage);
-        TextView text = (TextView) getView().findViewById(R.id.activityText);
-        switch (typeOfMovement) {
-            case "IN_VEHICLE":
-                image.setImageResource(R.drawable.ic_directions_car);
-                text.setText(resources.getString(R.string.in_vehicle));
-                break;
-            case "ON_BICYCLE":
-                image.setImageResource(R.drawable.ic_directions_bike);
-                text.setText(resources.getString(R.string.on_bicycle));
-                break;
-            case "ON_FOOT":
-                image.setImageResource(R.drawable.ic_directions_walk);
-                text.setText(resources.getString(R.string.on_foot));
-                break;
-            case "RUNNING":
-                image.setImageResource(R.drawable.ic_directions_run);
-                text.setText(resources.getString(R.string.running));
-                break;
-            case "WALKING":
-                image.setImageResource(R.drawable.ic_directions_walk);
-                text.setText(resources.getString(R.string.walking));
-                break;
-            case "STILL":
-                image.setImageResource(R.drawable.ic_person);
-                text.setText(resources.getString(R.string.still));
-                break;
-            case "TILTING":
-                image.setImageResource(R.drawable.ic_screen_rotation);
-                text.setText(resources.getString(R.string.tilting));
-                break;
-            case "UNKNOWN":
-                image.setImageResource(R.drawable.ic_do_not_disturb);
-                text.setText(resources.getString(R.string.unknown));
-                break;
-            default:
-                image.setImageResource(R.drawable.ic_do_not_disturb);
-                text.setText(resources.getString(R.string.unknown));
+        if (isAdded()) {
+            Resources resources = this.getResources();
+            ImageView image = (ImageView) getView().findViewById(R.id.activityImage);
+            TextView text = (TextView) getView().findViewById(R.id.activityText);
+            switch (typeOfMovement) {
+                case "IN_VEHICLE":
+                    image.setImageResource(R.drawable.ic_directions_car);
+                    text.setText(resources.getString(R.string.in_vehicle));
+                    break;
+                case "ON_BICYCLE":
+                    image.setImageResource(R.drawable.ic_directions_bike);
+                    text.setText(resources.getString(R.string.on_bicycle));
+                    break;
+                case "ON_FOOT":
+                    image.setImageResource(R.drawable.ic_directions_walk);
+                    text.setText(resources.getString(R.string.on_foot));
+                    break;
+                case "RUNNING":
+                    image.setImageResource(R.drawable.ic_directions_run);
+                    text.setText(resources.getString(R.string.running));
+                    break;
+                case "WALKING":
+                    image.setImageResource(R.drawable.ic_directions_walk);
+                    text.setText(resources.getString(R.string.walking));
+                    break;
+                case "STILL":
+                    image.setImageResource(R.drawable.ic_person);
+                    text.setText(resources.getString(R.string.still));
+                    break;
+                case "TILTING":
+                    image.setImageResource(R.drawable.ic_screen_rotation);
+                    text.setText(resources.getString(R.string.tilting));
+                    break;
+                case "UNKNOWN":
+                    image.setImageResource(R.drawable.ic_do_not_disturb);
+                    text.setText(resources.getString(R.string.unknown));
+                    break;
+                default:
+                    image.setImageResource(R.drawable.ic_do_not_disturb);
+                    text.setText(resources.getString(R.string.unknown));
+            }
         }
     }
 
@@ -159,14 +174,14 @@ public class StartFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
+        void onStartFragmentStarted();
         void onStartFragmentStartTracking();
-
         void onStartFragmentStopTracking();
     }
 }
