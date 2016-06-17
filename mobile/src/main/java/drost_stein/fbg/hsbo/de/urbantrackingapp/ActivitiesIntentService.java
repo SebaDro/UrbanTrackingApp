@@ -17,7 +17,7 @@ public class ActivitiesIntentService extends IntentService {
 
     private static final String TAG = "ActivitiesIntentService";
 
-    public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_ACTIVITY = PACKAGE_NAME + ".BROADCAST_ACTIVITY";
     private static final String EXTENDED_DATA_ACTIVITY = PACKAGE_NAME + ".DATA_ACTIVITY";
 

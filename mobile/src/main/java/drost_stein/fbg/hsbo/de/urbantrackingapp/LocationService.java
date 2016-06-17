@@ -45,7 +45,7 @@ import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 public class LocationService extends Service {
 
     private static MyLocationListener myLocationListener;
-    public static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_TRACK_POINT = PACKAGE_NAME + ".BROADCAST_TRACK_POINT";
     private static final String EXTENDED_DATA_TRACK_POINT = PACKAGE_NAME + ".DATA_TRACK_POINT";
     private static final String BROADCAST_ACTION_ACTIVITY = PACKAGE_NAME + ".BROADCAST_ACTIVITY";
@@ -84,9 +84,8 @@ public class LocationService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         int updateInterval = intent.getIntExtra("updateInterval", 10000);
 
-        if (myLocationListener == null) {
-            myLocationListener = new MyLocationListener(this);
-        }
+
+        myLocationListener = new MyLocationListener(this);
 
         myLocationListener.setUpdateInterval(updateInterval);
 
