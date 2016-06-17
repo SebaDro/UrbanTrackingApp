@@ -402,9 +402,6 @@ public class MainActivity
                 }
                 unSyncedTracks.add(track);
             }
-            String trackInfo = track.getTrackPoints().size() + " points have been tracked.";
-            Toast toast = Toast.makeText(mMapFragment.getContext(), trackInfo, Toast.LENGTH_LONG);
-            toast.show();
         }
     }
 }

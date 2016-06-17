@@ -17,6 +17,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -100,6 +101,10 @@ public class LocationService extends Service {
         DateTime endTime = DateTime.now();
         mCurrentTrack.setEndTime(endTime);
         sendTrack(mCurrentTrack);
+
+        String trackInfo = mCurrentTrack.getTrackPoints().size() + " points have been tracked.";
+        Toast toast = Toast.makeText(this, trackInfo, Toast.LENGTH_LONG);
+        toast.show();
     }
 
     public void sendTrackPoint(TrackPoint point) {
