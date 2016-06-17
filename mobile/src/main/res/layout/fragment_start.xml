@@ -120,6 +120,26 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:src="@drawable/ic_network_check" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="50dp"
+                    android:text='@{String.valueOf(startVM.trackPoint.speed)+" km/h"}' />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
                     android:src="@drawable/ic_place" />
 
                 <TextView
@@ -129,6 +149,8 @@
                     android:layout_marginStart="50dp"
                     android:text="immer da, wo was los ist" />
             </LinearLayout>
+
+
         </LinearLayout>
 
     </FrameLayout>

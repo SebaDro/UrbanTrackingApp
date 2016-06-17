@@ -39,10 +39,11 @@ public class TrackDeserializer implements JsonDeserializer<Track> {
             double lon=pointObject.get("LON").getAsDouble();
             double alt=pointObject.get("ALT").getAsDouble();
             double bearing=pointObject.get("BEARING").getAsDouble();
+            double speed=pointObject.get("SPEED").getAsDouble();
             float precision=pointObject.get("PRECISION").getAsFloat();
             DateTime time=new DateTime(pointObject.get("TIME").getAsJsonPrimitive().getAsString());
             String type=pointObject.get("TYPE").getAsString();
-            TrackPoint point=new TrackPoint(pointID,trackID,lat,lon,alt,bearing,precision,time,type);
+            TrackPoint point=new TrackPoint(pointID,trackID,lat,lon,alt,bearing,speed,precision,time,type);
             trackPoints.add(point);
         }
         Track track=new Track(id,userID,startTime,endTime,trackPoints);

@@ -20,17 +20,20 @@ public class TrackPoint extends BaseObservable implements Serializable {
     private double longitude;
     private double altitude;
     private double bearing;
+    private double speed;
     private float precision;
     private DateTime time;
     private String typeOfMovement;
 
-    public TrackPoint(long id, long trackID, double lat, double lon, double alt, double bearing, float precision, DateTime time,  String type) {
+    public TrackPoint(long id, long trackID, double lat, double lon, double alt, double bearing, double speed, float precision, DateTime time, String type) {
         this.id = id;
         this.trackID = trackID;
         this.latitude = lat;
         this.longitude = lon;
         this.altitude = alt;
         this.bearing = bearing;
+        this.speed=speed;
+
         this.precision = precision;
         this.time=time;
         this.typeOfMovement = type;
@@ -64,6 +67,11 @@ public class TrackPoint extends BaseObservable implements Serializable {
     @Bindable
     public double getBearing() {
         return bearing;
+    }
+
+    @Bindable
+    public double getSpeed() {
+        return speed;
     }
 
     @Bindable

@@ -35,6 +35,7 @@ public class TrackSerializer implements JsonSerializer<Track>{
             jsonPoint.addProperty("LON",p.getLongitude());
             jsonPoint.addProperty("ALT",p.getAltitude());
             jsonPoint.addProperty("BEARING",p.getBearing());
+            jsonPoint.addProperty("SPEED",p.getSpeed());
             jsonPoint.addProperty("PRECISION",p.getPrecision());
             jsonPoint.add("TIME",new JsonPrimitive(p.getTime().toString()));
             jsonPoint.addProperty("TYPE",p.getTypeOfMovement());
