@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -53,12 +54,24 @@ public class LocationService extends Service {
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
 
     private Track mCurrentTrack;
+    private TrackPoint mCurrentTrackPoint;
     private DetectedActivity mCurrentActivity;
 
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
 
     private NotificationManager mNM;
+
+    /**
+     * Class for clients to access.  Because we know this service always
+     * runs in the same process as its clients, we don't need to deal with
+     * IPC.
+     */
+    public class LocalBinder extends Binder {
+        LocationService getService() {
+            return LocationService.this;
+        }
+    }
 
     // Handler that receives messages from the thread
     private final class ServiceHandler extends Handler {
@@ -90,7 +103,7 @@ public class LocationService extends Service {
 
     @Override
     public void onCreate() {
-        mNM = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        mNM = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
         // Display a notification about us starting.  We put an icon in the status bar.
         showNotification();
@@ -98,9 +111,12 @@ public class LocationService extends Service {
 
     @Override
     public IBinder onBind(Intent arg0) {
-        // We don't provide binding, so return null
-        return null;
+        return mBinder;
     }
+
+    // This is the object that receives interactions from clients.  See
+    // RemoteService for a more complete example.
+    private final IBinder mBinder = new LocalBinder();
 
     @Override
     public void onDestroy() {
@@ -130,6 +146,11 @@ public class LocationService extends Service {
                         .putExtra(EXTENDED_DATA_TRACK, track);
         // Broadcasts the Intent to receivers in this app.
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent);
+    }
+
+    public void requestLastTrackPoint() {
+        if (mCurrentTrackPoint != null)
+            sendTrackPoint(mCurrentTrackPoint);
     }
 
     /**
@@ -231,6 +252,7 @@ public class LocationService extends Service {
                 DateTime time = new DateTime(location.getTime());
                 point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
                         location.getAltitude(), location.getBearing(), location.getAccuracy(), time, activity);
+                mCurrentTrackPoint = point;
                 mCurrentTrack.addTrackPoint(point);
             }
             mLocationService.sendTrackPoint(point);

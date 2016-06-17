@@ -3,14 +3,16 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -55,7 +57,6 @@ public class MainActivity
         MapFragment.OnFragmentInteractionListener {
 
     private Intent mLocationServiceIntent;
-    private Location mLastLocation;
 
     private Menu mMenu;
     private static boolean mGPSActive = false;
@@ -73,6 +74,10 @@ public class MainActivity
     private TrackPointSource trackPointsource;
     private NetworkManager mNetworkManager;
     private GsonBuilder gsonBuilder;
+    private LocationService mLocationService;
+    // Flag indicating whether we have called bind on the service.
+    private boolean mIsLocationServiceBound;
+
 
     private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_TRACK_POINT = PACKAGE_NAME + ".BROADCAST_TRACK_POINT";
@@ -139,7 +144,17 @@ public class MainActivity
         gsonBuilder.registerTypeAdapter(Track.class, new TrackSerializer());
         gsonBuilder.registerTypeAdapter(Track.class, new TrackDeserializer());
 
+        if (isMyServiceRunning(LocationService.class)) {
+            doBindLocationService();
+        }
+
         JodaTimeAndroid.init(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mConnection);
     }
 
     @Override
@@ -236,6 +251,7 @@ public class MainActivity
             //mLocationServiceIntent.putExtra("type", "start");
             mLocationServiceIntent.putExtra("updateInterval", getUpdateIntervalFromPreferences());
             startService(mLocationServiceIntent);
+            doBindLocationService();
         }
     }
 
@@ -247,6 +263,7 @@ public class MainActivity
         mGPSActive = false;
         //mLocationServiceIntent.putExtra("type", "end");
         stopService(mLocationServiceIntent);
+        doUnbindLocationService();
     }
 
     /**
@@ -344,7 +361,6 @@ public class MainActivity
                 } else {
                     // permission denied, boo!
                 }
-                return;
             }
         }
     }
@@ -377,6 +393,43 @@ public class MainActivity
             //String info = unSyncedTracks.size() + " tracks have been restored.";
             //Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
             //toast.show();
+        }
+    }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            // This is called when the connection with the service has been
+            // established, giving us the service object we can use to
+            // interact with the service.  Because we have bound to a explicit
+            // service that we know is running in our own process, we can
+            // cast its IBinder to a concrete class and directly access it.
+            mLocationService = ((LocationService.LocalBinder) service).getService();
+            mLocationService.requestLastTrackPoint();
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            // This is called when the connection with the service has been
+            // unexpectedly disconnected -- that is, its process crashed.
+            // Because it is running in our same process, we should never
+            // see this happen.
+            mLocationService = null;
+        }
+    };
+
+    void doBindLocationService() {
+        // Establish a connection with the service.  We use an explicit
+        // class name because we want a specific service implementation that
+        // we know will be running in our own process (and thus won't be
+        // supporting component replacement by other applications).
+        bindService(new Intent(this, LocationService.class), mConnection, Context.BIND_AUTO_CREATE);
+        mIsLocationServiceBound = true;
+    }
+
+    void doUnbindLocationService() {
+        if (mIsLocationServiceBound) {
+            // Detach our existing connection.
+            unbindService(mConnection);
+            mIsLocationServiceBound = false;
         }
     }
 
