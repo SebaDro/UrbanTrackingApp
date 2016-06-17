@@ -34,8 +34,11 @@ import android.widget.Toast;
 
 import com.esri.android.map.FeatureLayer;
 import com.esri.android.map.MapView;
+import com.esri.android.map.ags.ArcGISFeatureLayer;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
+import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.CallbackListener;
+import com.esri.core.tasks.query.QueryParameters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -45,6 +48,7 @@ import net.danlew.android.joda.JodaTimeAndroid;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
+import drost_stein.fbg.hsbo.de.urbantrackingapp.featuresource.TrackPointSource;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
@@ -77,6 +81,8 @@ public class MainActivity
     private LocationService mLocationService;
     // Flag indicating whether we have called bind on the service.
     private boolean mIsLocationServiceBound;
+
+    private final long userID=2;
 
 
     private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
@@ -272,6 +278,7 @@ public class MainActivity
     private void addTrackPointFeatureService() {
         String serviceURL = "http://services6.arcgis.com/RF3oqOe1dChQus9k/arcgis/rest/services/UrbanTrackPoints/FeatureServer";
         mFeatureServiceTable = new GeodatabaseFeatureServiceTable(serviceURL, 0);
+        mFeatureServiceTable.setFeatureRequestMode(GeodatabaseFeatureServiceTable.FeatureRequestMode.MANUAL_CACHE);
         mFeatureServiceTable.initialize(
                 new CallbackListener<GeodatabaseFeatureServiceTable.Status>() {
 
@@ -285,9 +292,27 @@ public class MainActivity
                     @Override
                     public void onCallback(GeodatabaseFeatureServiceTable.Status status) {
                         if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
-                            trackPointsource = new TrackPointSource(mFeatureServiceTable);
-                            mTrackPointFeatureLayer = new FeatureLayer(mFeatureServiceTable);
-                            mMapView.addLayer(mTrackPointFeatureLayer);
+                            QueryParameters qParameters = new QueryParameters();
+                            String whereClause = "user_id="+userID;
+                            qParameters.setReturnGeometry(true);
+                            qParameters.setWhere(whereClause);
+                            mFeatureServiceTable.populateFromService(qParameters, true, new CallbackListener<Boolean>() {
+                                @Override
+                                public void onCallback(Boolean aBoolean) {
+                                    if (aBoolean) {
+                                        mTrackPointFeatureLayer = new FeatureLayer(mFeatureServiceTable);
+                                        trackPointsource = new TrackPointSource(mFeatureServiceTable);
+                                        mMapView.addLayer(mTrackPointFeatureLayer);
+                                    }
+                                }
+
+                                @Override
+                                public void onError(Throwable throwable) {
+                                    String error = mFeatureServiceTable.getInitializationError();
+                                    Toast toast = Toast.makeText(mMapFragment.getContext(), error, Toast.LENGTH_LONG);
+                                    toast.show();
+                                }
+                            });
                         }
                     }
                 });
@@ -447,12 +472,12 @@ public class MainActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Track track = (Track) intent.getExtras().get(EXTENDED_DATA_TRACK);
+            if (unSyncedTracks == null) {
+                unSyncedTracks = new ArrayList<Track>();
+            }
             if (mNetworkManager.isOnline()) {
                 //TODO uploading tracks
             } else {
-                if (unSyncedTracks == null) {
-                    unSyncedTracks = new ArrayList<Track>();
-                }
                 unSyncedTracks.add(track);
             }
         }
