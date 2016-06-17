@@ -154,7 +154,7 @@ public class MainActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        unbindService(mConnection);
+        doUnbindLocationService();
     }
 
     @Override
