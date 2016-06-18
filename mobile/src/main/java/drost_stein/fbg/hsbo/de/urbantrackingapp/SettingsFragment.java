@@ -23,7 +23,7 @@ public class SettingsFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private SeekBar mUpdateIntervalSeekBar;
     private Button mResetButton;
-    private int seekBarMax = 60000;
+    private int seekBarMax = 360000;
     private int seekBarMin = 5000;
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
     private static final String PREFS_USER_ID = "userId";
@@ -48,13 +48,13 @@ public class SettingsFragment extends Fragment {
 
         mUpdateIntervalSeekBar.setMax(seekBarMax - seekBarMin);
 
-        mUpdateIntervalSeekBar.setProgress(getUpdateIntervalFromPreferences());
+        mUpdateIntervalSeekBar.setProgress(seekBarMax - getUpdateIntervalFromPreferences());
 
         mUpdateIntervalSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             int updateInterval = 0;
 
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                updateInterval = seekBarMin + progress;
+                updateInterval = seekBarMax - progress;
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -113,7 +113,7 @@ public class SettingsFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p>
+     * <p/>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.

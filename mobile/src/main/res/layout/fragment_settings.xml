@@ -28,7 +28,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/high_update_interval"
+                android:text="@string/low_update_interval"
                 android:textAlignment="center"
                 android:textSize="14sp" />
 
@@ -42,7 +42,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/low_update_interval"
+                android:text="@string/high_update_interval"
                 android:textAlignment="center"
                 android:textSize="14sp" />
         </LinearLayout>
