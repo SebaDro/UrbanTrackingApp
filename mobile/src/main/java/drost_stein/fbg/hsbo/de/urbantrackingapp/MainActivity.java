@@ -37,6 +37,7 @@ import com.esri.android.map.MapView;
 import com.esri.core.geodatabase.GeodatabaseEditError;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
 import com.esri.core.map.CallbackListener;
+import com.esri.core.map.Feature;
 import com.esri.core.tasks.query.QueryParameters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -63,7 +64,6 @@ public class MainActivity
     private Intent mLocationServiceIntent;
 
     private Menu mMenu;
-    private static boolean mGPSActive = false;
     private StartFragment mStartFragment;
     private SettingsFragment mSettingsFragment;
 
@@ -169,7 +169,6 @@ public class MainActivity
     }
 
 
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -185,8 +184,8 @@ public class MainActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         mMenu = menu;
         getMenuInflater().inflate(R.menu.main, menu);
-        if (mGPSActive == true) {
-            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
+        if (isMyServiceRunning(LocationService.class)) {
+            mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
         }
         return true;
     }
@@ -260,7 +259,6 @@ public class MainActivity
                     new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, 0);
         } else {
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
-            mGPSActive = true;
             mLocationServiceIntent.putExtra("updateInterval", getUpdateIntervalFromPreferences());
             mLocationServiceIntent.putExtra("userId", mUserID);
             startService(mLocationServiceIntent);
@@ -273,7 +271,6 @@ public class MainActivity
      */
     public void stopTracking() {
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
-        mGPSActive = false;
         //mLocationServiceIntent.putExtra("type", "end");
         stopService(mLocationServiceIntent);
         doUnbindLocationService();
@@ -301,7 +298,7 @@ public class MainActivity
                         if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
                             QueryParameters qParameters = new QueryParameters();
                             //String whereClause = "user_id=" + mUserID;
-                            String whereClause = "user_id='"+mUserID+"'";
+                            String whereClause = "user_id='" + mUserID + "'";
                             qParameters.setReturnGeometry(true);
                             qParameters.setWhere(whereClause);
                             mFeatureServiceTable.populateFromService(qParameters, true, new CallbackListener<Boolean>() {
@@ -493,7 +490,7 @@ public class MainActivity
             String trackInfo = "";
             if (i == 0) {
                 trackInfo = getString(R.string.no_points_tracked);
-            } else if(i==1) {
+            } else if (i == 1) {
                 trackInfo = getString(R.string.one_point_tracked);
             } else {
                 trackInfo = track.getTrackPoints().size() + " " + getString(R.string.points_tracked);
