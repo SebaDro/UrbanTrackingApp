@@ -7,6 +7,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -21,9 +22,12 @@ public class SettingsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private SeekBar mUpdateIntervalSeekBar;
+    private Button mResetButton;
     private int seekBarMax = 60000;
     private int seekBarMin = 5000;
-    public static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
+    private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
+    private static final String PREFS_USER_ID = "userId";
+    private static final String PREFS_NAME = "user";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -64,6 +68,18 @@ public class SettingsFragment extends Fragment {
                 editor.commit();
                 Toast.makeText(getActivity(), getString(R.string.update_interval) + ": " + updateInterval / 1000 + " " + getString(R.string.seconds),
                         Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mResetButton = (Button) view.findViewById(R.id.resetButton);
+        mResetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences sharedPref = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putString(PREFS_USER_ID, null);
+                editor.commit();
+                getActivity().finish();
             }
         });
         return view;

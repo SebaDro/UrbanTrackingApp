@@ -40,6 +40,11 @@
 
     <string name="location_service_started">Tracking started</string>
 
+    <string name="welcome">Welcome to the UrbanTrackingApp!</string>
+    <string name="login">Please login to your Google account</string>
+
+    <string name="reset_app">Reset app</string>
+
     <string name="preference_file_key_tracks">drost_stein.fbg.hsbo.de.urbantrackingapp.UNSYNCED_TRACKS</string>
 
 </resources>

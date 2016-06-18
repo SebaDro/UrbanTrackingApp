@@ -82,20 +82,25 @@ public class MainActivity
     // Flag indicating whether we have called bind on the service.
     private boolean mIsLocationServiceBound;
 
-    private final long userID=2;
-
+    private String mUserID;
 
     private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_TRACK_POINT = PACKAGE_NAME + ".BROADCAST_TRACK_POINT";
     private static final String EXTENDED_DATA_TRACK_POINT = PACKAGE_NAME + ".DATA_TRACK_POINT";
     private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
-    public static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
+
+    private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
+    private static final String PREFS_USER_ID = "userId";
+    private static final String PREFS_NAME = "user";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        SharedPreferences sharedPref = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUserID = sharedPref.getString(PREFS_USER_ID, null);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -293,7 +298,7 @@ public class MainActivity
                     public void onCallback(GeodatabaseFeatureServiceTable.Status status) {
                         if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
                             QueryParameters qParameters = new QueryParameters();
-                            String whereClause = "user_id="+userID;
+                            String whereClause = "user_id=" + mUserID;
                             qParameters.setReturnGeometry(true);
                             qParameters.setWhere(whereClause);
                             mFeatureServiceTable.populateFromService(qParameters, true, new CallbackListener<Boolean>() {
