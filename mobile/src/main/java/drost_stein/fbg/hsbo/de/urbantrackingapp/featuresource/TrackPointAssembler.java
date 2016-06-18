@@ -55,7 +55,7 @@ public class TrackPointAssembler {
         attributes.put(BEARING,point.getBearing());
         attributes.put(SPEED,point.getSpeed());
         attributes.put(PRECISION,point.getPrecision());
-        attributes.put(TRACKING_TIME,point.getTime());
+        attributes.put(TRACKING_TIME,point.getTime().getMillis());
         attributes.put(TYPE_OF_MOVEMENT,point.getTypeOfMovement());
 
         Point projectedPoint= GeometryEngine.project(point.getLongitude(),point.getLatitude(),SpatialReference.create(SpatialReference.WKID_WGS84_WEB_MERCATOR_AUXILIARY_SPHERE));
