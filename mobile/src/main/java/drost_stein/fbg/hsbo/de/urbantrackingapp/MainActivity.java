@@ -259,8 +259,8 @@ public class MainActivity
         } else {
             mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_fixed_white_48dp));
             mGPSActive = true;
-            //mLocationServiceIntent.putExtra("type", "start");
             mLocationServiceIntent.putExtra("updateInterval", getUpdateIntervalFromPreferences());
+            mLocationServiceIntent.putExtra("userId", mUserID);
             startService(mLocationServiceIntent);
             doBindLocationService();
         }

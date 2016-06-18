@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Binder;
@@ -56,6 +57,7 @@ public class LocationService extends Service {
     private Track mCurrentTrack;
     private TrackPoint mCurrentTrackPoint;
     private DetectedActivity mCurrentActivity;
+    private String mUserID;
 
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
@@ -83,7 +85,7 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         int updateInterval = intent.getIntExtra("updateInterval", 10000);
-
+        mUserID = intent.getStringExtra("userId");
 
         myLocationListener = new MyLocationListener(this);
 
