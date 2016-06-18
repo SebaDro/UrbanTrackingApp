@@ -96,7 +96,7 @@ public class LocationService extends Service {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 activitiesResponseReceiver, activityIntentFilter);
         DateTime startTime = DateTime.now();
-        mCurrentTrack = new Track(1, 1, startTime);
+        mCurrentTrack = new Track(1, mUserID, startTime);
         myLocationListener.startLocationUpdates();
 
         return Service.START_REDELIVER_INTENT;
@@ -247,7 +247,7 @@ public class LocationService extends Service {
             }
             if (mLastLocation != null) {
                 DateTime time = new DateTime(location.getTime());
-                point = new TrackPoint(location.getTime(), 2l, location.getLatitude(), location.getLongitude(),
+                point = new TrackPoint(location.getTime(), 2l,mUserID, location.getLatitude(), location.getLongitude(),
                         location.getAltitude(), location.getBearing(),location.getSpeed(), location.getAccuracy(), time, activity);
                 mCurrentTrackPoint = point;
                 mCurrentTrack.addTrackPoint(point);

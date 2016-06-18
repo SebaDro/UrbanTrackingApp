@@ -26,7 +26,7 @@ public class TrackDeserializer implements JsonDeserializer<Track> {
     public Track deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         JsonObject jsonTrack=json.getAsJsonObject();
         Long id=jsonTrack.get("ID").getAsLong();
-        Long userID=jsonTrack.get("USER_ID").getAsLong();
+        String userID=jsonTrack.get("USER_ID").getAsString();
         DateTime startTime=new DateTime(jsonTrack.get("START_TIME").getAsJsonPrimitive().getAsString());
         DateTime endTime=new DateTime(jsonTrack.get("END_TIME").getAsJsonPrimitive().getAsString());
         JsonArray jsonTrackPoints=jsonTrack.get("TRACK_POINTS").getAsJsonArray();
@@ -43,7 +43,7 @@ public class TrackDeserializer implements JsonDeserializer<Track> {
             float precision=pointObject.get("PRECISION").getAsFloat();
             DateTime time=new DateTime(pointObject.get("TIME").getAsJsonPrimitive().getAsString());
             String type=pointObject.get("TYPE").getAsString();
-            TrackPoint point=new TrackPoint(pointID,trackID,lat,lon,alt,bearing,speed,precision,time,type);
+            TrackPoint point=new TrackPoint(pointID,trackID,userID,lat,lon,alt,bearing,speed,precision,time,type);
             trackPoints.add(point);
         }
         Track track=new Track(id,userID,startTime,endTime,trackPoints);

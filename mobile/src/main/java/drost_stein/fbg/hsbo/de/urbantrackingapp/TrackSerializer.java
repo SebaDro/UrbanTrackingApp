@@ -29,7 +29,7 @@ public class TrackSerializer implements JsonSerializer<Track>{
         JsonArray trackPointArray=new JsonArray();
         for (TrackPoint p:src.getTrackPoints()){
             JsonObject jsonPoint=new JsonObject();
-            jsonPoint.addProperty("ID",p.getID());
+            jsonPoint.addProperty("ID",p.getId());
             jsonPoint.addProperty("TRACK_ID",p.getTrackID());
             jsonPoint.addProperty("LAT",p.getLatitude());
             jsonPoint.addProperty("LON",p.getLongitude());

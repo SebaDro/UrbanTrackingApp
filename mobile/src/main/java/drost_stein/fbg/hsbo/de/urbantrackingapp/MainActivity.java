@@ -34,9 +34,8 @@ import android.widget.Toast;
 
 import com.esri.android.map.FeatureLayer;
 import com.esri.android.map.MapView;
-import com.esri.android.map.ags.ArcGISFeatureLayer;
+import com.esri.core.geodatabase.GeodatabaseEditError;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
-import com.esri.core.geometry.SpatialReference;
 import com.esri.core.map.CallbackListener;
 import com.esri.core.tasks.query.QueryParameters;
 import com.google.gson.Gson;
@@ -47,6 +46,7 @@ import net.danlew.android.joda.JodaTimeAndroid;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 import drost_stein.fbg.hsbo.de.urbantrackingapp.featuresource.TrackPointSource;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
@@ -76,7 +76,7 @@ public class MainActivity
     private ArrayList<Track> unSyncedTracks;
 
     private TrackPointSource trackPointsource;
-    private NetworkManager mNetworkManager;
+    private NetworkReceiver mNetworkReceiver;
     private GsonBuilder gsonBuilder;
     private LocationService mLocationService;
     // Flag indicating whether we have called bind on the service.
@@ -101,6 +101,7 @@ public class MainActivity
 
         SharedPreferences sharedPref = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mUserID = sharedPref.getString(PREFS_USER_ID, null);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -150,7 +151,12 @@ public class MainActivity
             transaction.hide(mMapFragment);
             transaction.commit();
         }
-        mNetworkManager = new NetworkManager(ConnectivityManager.TYPE_MOBILE, getApplicationContext());
+
+        // Registers BroadcastReceiver to track network connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkReceiver = new NetworkReceiver(ConnectivityManager.TYPE_WIFI, getApplicationContext());
+        this.registerReceiver(mNetworkReceiver, filter);
+
         gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Track.class, new TrackSerializer());
         gsonBuilder.registerTypeAdapter(Track.class, new TrackDeserializer());
@@ -162,11 +168,7 @@ public class MainActivity
         JodaTimeAndroid.init(this);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        doUnbindLocationService();
-    }
+
 
     @Override
     public void onBackPressed() {
@@ -290,7 +292,7 @@ public class MainActivity
                     @Override
                     public void onError(Throwable e) {
                         String error = mFeatureServiceTable.getInitializationError();
-                        Toast toast = Toast.makeText(mMapFragment.getContext(), error, Toast.LENGTH_LONG);
+                        Toast toast = Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG);
                         toast.show();
                     }
 
@@ -298,7 +300,8 @@ public class MainActivity
                     public void onCallback(GeodatabaseFeatureServiceTable.Status status) {
                         if (status == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
                             QueryParameters qParameters = new QueryParameters();
-                            String whereClause = "user_id=" + mUserID;
+                            //String whereClause = "user_id=" + mUserID;
+                            String whereClause = "user_id='"+mUserID+"'";
                             qParameters.setReturnGeometry(true);
                             qParameters.setWhere(whereClause);
                             mFeatureServiceTable.populateFromService(qParameters, true, new CallbackListener<Boolean>() {
@@ -314,7 +317,7 @@ public class MainActivity
                                 @Override
                                 public void onError(Throwable throwable) {
                                     String error = mFeatureServiceTable.getInitializationError();
-                                    Toast toast = Toast.makeText(mMapFragment.getContext(), error, Toast.LENGTH_LONG);
+                                    Toast toast = Toast.makeText(getApplicationContext(), error, Toast.LENGTH_LONG);
                                     toast.show();
                                 }
                             });
@@ -410,7 +413,7 @@ public class MainActivity
     @Override
     protected void onStart() {
         super.onStart();
-
+        mFeatureServiceTable.getStatus();
         SharedPreferences sharedPref = getPreferences(Context.MODE_PRIVATE);
 
         String jsonTracks = sharedPref.getString(getString(R.string.preference_file_key_tracks), null);
@@ -423,6 +426,16 @@ public class MainActivity
             //String info = unSyncedTracks.size() + " tracks have been restored.";
             //Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
             //toast.show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        doUnbindLocationService();
+        // Unregisters BroadcastReceiver when app is destroyed.
+        if (mNetworkReceiver != null) {
+            this.unregisterReceiver(mNetworkReceiver);
         }
     }
 
@@ -463,7 +476,6 @@ public class MainActivity
         }
     }
 
-
     private class TrackPointResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -488,12 +500,22 @@ public class MainActivity
             }
             Toast toast = Toast.makeText(getApplicationContext(), trackInfo, Toast.LENGTH_LONG);
             toast.show();
+            trackPointsource.addTrackToTable(track);
             if (unSyncedTracks == null) {
                 unSyncedTracks = new ArrayList<Track>();
-
             }
-            if (mNetworkManager.isOnline()) {
-                //TODO uploading tracks
+            if (mNetworkReceiver.hasPrefferedConnection()) {
+                mFeatureServiceTable.applyEdits(new CallbackListener<List<GeodatabaseEditError>>() {
+                    @Override
+                    public void onCallback(List<GeodatabaseEditError> geodatabaseEditErrors) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+
+                    }
+                });
             } else {
                 unSyncedTracks.add(track);
             }

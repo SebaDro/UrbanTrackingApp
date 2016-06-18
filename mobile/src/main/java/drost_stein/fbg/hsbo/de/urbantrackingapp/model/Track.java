@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class Track extends BaseObservable implements Serializable{
     private long id;
-    private long userID;
+    private String userID;
     private DateTime startTime;
     private DateTime endTime;
     private List<TrackPoint> trackPoints;
@@ -27,7 +27,7 @@ public class Track extends BaseObservable implements Serializable{
      * @param userID id fo the user who is tracking
      * @param startTime start time of the tracking
      */
-    public Track(long id, long userID, DateTime startTime) {
+    public Track(long id, String userID, DateTime startTime) {
         this.id = id;
         this.userID = userID;
         this.startTime = startTime;
@@ -42,7 +42,7 @@ public class Track extends BaseObservable implements Serializable{
      * @param endTime end time of the tracking
      * @param trackPoints points of the track
      */
-    public Track(long id, long userID, DateTime startTime,DateTime endTime, List<TrackPoint> trackPoints) {
+    public Track(long id, String userID, DateTime startTime,DateTime endTime, List<TrackPoint> trackPoints) {
         this.id = id;
         this.userID = userID;
         this.startTime = startTime;
@@ -56,7 +56,7 @@ public class Track extends BaseObservable implements Serializable{
     }
 
     @Bindable
-    public long getUserID() {
+    public String getUserID() {
         return userID;
     }
 
