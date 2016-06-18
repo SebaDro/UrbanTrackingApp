@@ -123,10 +123,6 @@ public class LocationService extends Service {
         DateTime endTime = DateTime.now();
         mCurrentTrack.setEndTime(endTime);
         sendTrack(mCurrentTrack);
-
-        String trackInfo = mCurrentTrack.getTrackPoints().size() + " points have been tracked.";
-        Toast toast = Toast.makeText(this, trackInfo, Toast.LENGTH_LONG);
-        toast.show();
     }
 
     public void sendTrackPoint(TrackPoint point) {

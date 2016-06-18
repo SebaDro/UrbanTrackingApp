@@ -477,8 +477,20 @@ public class MainActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Track track = (Track) intent.getExtras().get(EXTENDED_DATA_TRACK);
+            int i = track.getTrackPoints().size();
+            String trackInfo = "";
+            if (i == 0) {
+                trackInfo = getString(R.string.no_points_tracked);
+            } else if(i==1) {
+                trackInfo = getString(R.string.one_point_tracked);
+            } else {
+                trackInfo = track.getTrackPoints().size() + " " + getString(R.string.points_tracked);
+            }
+            Toast toast = Toast.makeText(getApplicationContext(), trackInfo, Toast.LENGTH_LONG);
+            toast.show();
             if (unSyncedTracks == null) {
                 unSyncedTracks = new ArrayList<Track>();
+
             }
             if (mNetworkManager.isOnline()) {
                 //TODO uploading tracks

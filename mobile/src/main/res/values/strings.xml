@@ -45,6 +45,10 @@
 
     <string name="reset_app">Reset app</string>
 
+    <string name="no_points_tracked">No points tracked</string>
+    <string name="one_point_tracked">One point tracked</string>
+    <string name="points_tracked">points tracked</string>
+
     <string name="preference_file_key_tracks">drost_stein.fbg.hsbo.de.urbantrackingapp.UNSYNCED_TRACKS</string>
 
 </resources>
