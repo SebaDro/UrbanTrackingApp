@@ -67,6 +67,7 @@ public class LocationService extends Service {
     private TrackPoint mCurrentTrackPoint;
     private DetectedActivity mCurrentActivity;
     private String mUserID;
+    private long trackPointCounter;
 
     private Looper mServiceLooper;
     private ServiceHandler mServiceHandler;
@@ -104,8 +105,9 @@ public class LocationService extends Service {
         IntentFilter activityIntentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 activitiesResponseReceiver, activityIntentFilter);
+        trackPointCounter=0;
         DateTime startTime = DateTime.now();
-        mCurrentTrack = new Track(1, mUserID, startTime);
+        mCurrentTrack = new Track(startTime.getMillis(), mUserID, startTime);
         myLocationListener.startLocationUpdates();
 
         return Service.START_REDELIVER_INTENT;
@@ -257,12 +259,13 @@ public class LocationService extends Service {
             }
             if (mLastLocation != null) {
                 DateTime time = new DateTime(location.getTime());
-                point = new TrackPoint(location.getTime(), 2l, mUserID, location.getLatitude(), location.getLongitude(),
-                        location.getAltitude(), location.getBearing(), location.getSpeed(), location.getAccuracy(), time, activity);
+                point = new TrackPoint(trackPointCounter, mCurrentTrack.getId(),mUserID, location.getLatitude(), location.getLongitude(),
+                        location.getAltitude(), location.getBearing(),location.getSpeed(), location.getAccuracy(), time, activity);
                 mCurrentTrackPoint = point;
                 mCurrentTrack.addTrackPoint(point);
             }
             mLocationService.sendTrackPoint(point);
+            trackPointCounter++;
 
             PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/trackPoint");
             putDataMapReq.getDataMap().putDouble(LATITUDE_KEY, point.getLatitude());
