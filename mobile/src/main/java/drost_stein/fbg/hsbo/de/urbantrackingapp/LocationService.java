@@ -174,7 +174,7 @@ public class LocationService extends Service {
 
         // Set the info for the views that show in the notification panel.
         Notification notification = new Notification.Builder(this)
-                .setSmallIcon(R.drawable.ic_my_location)  // the status icon
+                .setSmallIcon(R.drawable.urban_tracker_app_logo)  // the status icon
                 .setTicker(text)  // the status text
                 .setWhen(System.currentTimeMillis())  // the time stamp
                 .setContentTitle(getText(R.string.app_name))  // the label of the entry
