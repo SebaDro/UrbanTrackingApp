@@ -175,7 +175,7 @@ public class MainActivity
             doBindLocationService();
         }
 
-        unSyncedTracks=new ArrayList<Track>();
+        unSyncedTracks = new ArrayList<Track>();
         mFeatureServiceTable = new GeodatabaseFeatureServiceTable(SERVICE_URL, 0);
         JodaTimeAndroid.init(this);
     }
@@ -498,11 +498,11 @@ public class MainActivity
                             @Override
                             public void run() {
                                 mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+                                Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_success), Toast.LENGTH_SHORT).show();
                             }
                         });
-
-                        Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_success), Toast.LENGTH_SHORT).show();
                     }
+
                     @Override
                     public void onError(Throwable throwable) {
                         Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_error), Toast.LENGTH_SHORT).show();
@@ -552,10 +552,9 @@ public class MainActivity
             } else {
                 trackInfo = track.getTrackPoints().size() + " " + getString(R.string.points_tracked);
             }
-            Toast toast = Toast.makeText(getApplicationContext(), trackInfo, Toast.LENGTH_LONG);
-            toast.show();
+            Toast.makeText(getApplicationContext(), trackInfo, Toast.LENGTH_LONG).show();
 
-            if (track.getTrackPoints().size()>0){
+            if (track.getTrackPoints().size() > 0) {
                 unSyncedTracks.add(track);
             }
             mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
