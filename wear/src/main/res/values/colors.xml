@@ -16,9 +16,9 @@
 
 <resources>
 
-    <item name="color1" type="color">#414141</item>
-    <item name="geotracker_green" type="color">#26ba30</item>
-    <color name="wl_gray">#c1c1c1</color>
-    <color name="text_color">#BBB</color>
+    <color name="background">#969696</color>
+    <color name="colorPrimary">#9724b4</color>
+    <color name="colorPrimaryDark">#540746</color>
+    <color name="colorAccent">#4069ff</color>
 
 </resources>

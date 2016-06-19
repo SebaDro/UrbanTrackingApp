@@ -26,8 +26,8 @@ public class SettingsFragment extends Fragment {
     private int seekBarMax = 360000;
     private int seekBarMin = 5000;
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
-    private static final String PREFS_USER_ID = "userId";
-    private static final String PREFS_NAME = "user";
+    private static final String PREFS_USER_ID_KEY = "userId";
+    private static final String PREFS_NAME = "urbanTrackingPrefs";
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -62,7 +62,7 @@ public class SettingsFragment extends Fragment {
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
-                SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+                SharedPreferences sharedPref = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
                 editor.putInt(PREFS_UPDATE_INTERVAL_KEY, updateInterval);
                 editor.commit();
@@ -77,7 +77,7 @@ public class SettingsFragment extends Fragment {
             public void onClick(View view) {
                 SharedPreferences sharedPref = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(PREFS_USER_ID, null);
+                editor.putString(PREFS_USER_ID_KEY, null);
                 editor.commit();
                 getActivity().finish();
             }
@@ -86,7 +86,7 @@ public class SettingsFragment extends Fragment {
     }
 
     public int getUpdateIntervalFromPreferences() {
-        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         int updateInterval = sharedPref.getInt(PREFS_UPDATE_INTERVAL_KEY, 10000);
         return updateInterval;
     }

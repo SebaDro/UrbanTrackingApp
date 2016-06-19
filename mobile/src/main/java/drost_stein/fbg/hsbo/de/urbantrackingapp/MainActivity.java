@@ -37,7 +37,6 @@ import com.esri.android.map.MapView;
 import com.esri.core.geodatabase.GeodatabaseEditError;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
 import com.esri.core.map.CallbackListener;
-import com.esri.core.map.Feature;
 import com.esri.core.tasks.query.QueryParameters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -91,8 +90,8 @@ public class MainActivity
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
 
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
-    private static final String PREFS_USER_ID = "userId";
-    private static final String PREFS_NAME = "user";
+    private static final String PREFS_USER_ID_KEY = "userId";
+    private static final String PREFS_NAME = "urbanTrackingPrefs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +99,7 @@ public class MainActivity
         setContentView(R.layout.activity_main);
 
         SharedPreferences sharedPref = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        mUserID = sharedPref.getString(PREFS_USER_ID, null);
+        mUserID = sharedPref.getString(PREFS_USER_ID_KEY, null);
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -271,7 +270,6 @@ public class MainActivity
      */
     public void stopTracking() {
         mMenu.getItem(0).setIcon(getResources().getDrawable(R.drawable.ic_gps_off_white_48dp));
-        //mLocationServiceIntent.putExtra("type", "end");
         stopService(mLocationServiceIntent);
         doUnbindLocationService();
     }
@@ -329,7 +327,7 @@ public class MainActivity
      * @return update interval
      */
     public int getUpdateIntervalFromPreferences() {
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences sharedPref = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         int updateInterval = sharedPref.getInt(PREFS_UPDATE_INTERVAL_KEY, 10000);
         return updateInterval;
     }

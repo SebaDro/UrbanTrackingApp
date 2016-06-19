@@ -1,10 +1,7 @@
 package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.activity.WearableActivity;
 import android.support.wearable.view.BoxInsetLayout;
@@ -21,6 +18,12 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataEvent;
+import com.google.android.gms.wearable.DataEventBuffer;
+import com.google.android.gms.wearable.DataItem;
+import com.google.android.gms.wearable.DataMap;
+import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
@@ -31,11 +34,17 @@ import java.util.Date;
 import java.util.Locale;
 
 public class WearMainActivity extends WearableActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, DataApi.DataListener {
 
     private static final String TAG = "WearableActivity";
-    private static final String START_TRACKING_PATH = "/start_tracking";
-    private static final String STOP_TRACKING_PATH = "/stop_tracking";
+    private static final String HANDLE_TRACKING_PATH = "/handle_tracking";
+
+    private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String LATITUDE_KEY = PACKAGE_NAME + ".latitude";
+    private static final String LONGITUDE_KEY = PACKAGE_NAME + ".longitude";
+    private static final String TIME_KEY = PACKAGE_NAME + ".time";
+    private static final String ACTIVITY_KEY = PACKAGE_NAME + ".activity";
+    private static final String SPEED_KEY = PACKAGE_NAME + ".speed";
 
     private static final SimpleDateFormat AMBIENT_DATE_FORMAT =
             new SimpleDateFormat("HH:mm", Locale.US);
@@ -71,6 +80,13 @@ public class WearMainActivity extends WearableActivity implements GoogleApiClien
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Wearable.DataApi.removeListener(mGoogleApiClient, this);
+        mGoogleApiClient.disconnect();
     }
 
     @Override
@@ -113,6 +129,7 @@ public class WearMainActivity extends WearableActivity implements GoogleApiClien
 
     @Override
     public void onConnected(Bundle bundle) {
+        Wearable.DataApi.addListener(mGoogleApiClient, this);
         Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).setResultCallback(new ResultCallback<NodeApi.GetConnectedNodesResult>() {
             @Override
             public void onResult(NodeApi.GetConnectedNodesResult nodes) {
@@ -142,56 +159,29 @@ public class WearMainActivity extends WearableActivity implements GoogleApiClien
             mClockView.setVisibility(View.VISIBLE);
             mClockView.setText(AMBIENT_DATE_FORMAT.format(new Date()));
         } else {
-            mContainerView.setBackgroundColor(getResources().getColor(R.color.color1));
+            mContainerView.setBackgroundColor(getResources().getColor(R.color.background));
             mClockView.setVisibility(View.GONE);
         }
     }
 
-    /**
-     * Starts the tracking.
-     */
-    private void startTracking() {
-        if (mNode != null && mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            Wearable.MessageApi.sendMessage(
-                    mGoogleApiClient, mNode.getId(), START_TRACKING_PATH, null).setResultCallback(
-                    new ResultCallback<MessageApi.SendMessageResult>() {
-                        @Override
-                        public void onResult(MessageApi.SendMessageResult sendMessageResult) {
-                            if (!sendMessageResult.getStatus().isSuccess()) {
-                                Log.e("TAG", "Failed to send message with status code: "
-                                        + sendMessageResult.getStatus().getStatusCode());
-                            } else {
-                                showOpenOnPhoneConfirmationActivity(getString(R.string.start_tracking_on_phone));
-                            }
-                        }
-                    }
-            );
-        } else {
-            //Improve your code
-        }
-    }
-
-    /**
-     * Stops the tracking.
-     */
-    private void stopTracking() {
-        if (mNode != null && mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            Wearable.MessageApi.sendMessage(
-                    mGoogleApiClient, mNode.getId(), STOP_TRACKING_PATH, null).setResultCallback(
-                    new ResultCallback<MessageApi.SendMessageResult>() {
-                        @Override
-                        public void onResult(MessageApi.SendMessageResult sendMessageResult) {
-                            if (!sendMessageResult.getStatus().isSuccess()) {
-                                Log.e("TAG", "Failed to send message with status code: "
-                                        + sendMessageResult.getStatus().getStatusCode());
-                            } else {
-                                showOpenOnPhoneConfirmationActivity(getString(R.string.stop_tracking_on_phone));
-                            }
-                        }
-                    }
-            );
-        } else {
-            //Improve your code
+    @Override
+    public void onDataChanged(DataEventBuffer dataEventBuffer) {
+        for (DataEvent event : dataEventBuffer) {
+            if (event.getType() == DataEvent.TYPE_CHANGED) {
+                // DataItem changed
+                DataItem item = event.getDataItem();
+                if (item.getUri().getPath().compareTo("/trackPoint") == 0) {
+                    DataMap dataMap = DataMapItem.fromDataItem(item).getDataMap();
+                    TextView coordinateTextView = (TextView) findViewById(R.id.coordinates);
+                    TextView timeTextView = (TextView) findViewById(R.id.time);
+                    TextView activityTextView = (TextView) findViewById(R.id.activity);
+                    TextView speedTextView = (TextView) findViewById(R.id.speed);
+                    coordinateTextView.setText(String.valueOf(dataMap.getDouble(LATITUDE_KEY)) + "," + String.valueOf(dataMap.getDouble(LONGITUDE_KEY)));
+                    timeTextView.setText(dataMap.getString(TIME_KEY));
+                    activityTextView.setText(dataMap.getString(ACTIVITY_KEY));
+                    speedTextView.setText(String.valueOf(dataMap.getDouble(SPEED_KEY)));
+                }
+            }
         }
     }
 
@@ -201,7 +191,7 @@ public class WearMainActivity extends WearableActivity implements GoogleApiClien
     public class GridViewPagerAdapter extends GridPagerAdapter {
         @Override
         public int getColumnCount(int arg0) {
-            return 3;
+            return 2;
         }
 
         @Override
@@ -217,25 +207,12 @@ public class WearMainActivity extends WearableActivity implements GoogleApiClien
                 return view;
             } else if (col == 1) {
                 final View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.grid_view_page_2, container, false);
-                final CircledImageView startTrackingButton = (CircledImageView) view.findViewById(R.id.start_tracking);
+                final CircledImageView trackingButton = (CircledImageView) view.findViewById(R.id.trackingButton);
 
-                startTrackingButton.setOnClickListener(new View.OnClickListener() {
+                trackingButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        startTracking();
-                    }
-                });
 
-                container.addView(view);
-                return view;
-            } else if (col == 2) {
-                final View view = LayoutInflater.from(getApplicationContext()).inflate(R.layout.grid_view_page_3, container, false);
-                final CircledImageView smartPhoneButton = (CircledImageView) view.findViewById(R.id.stop_tracking);
-
-                smartPhoneButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        stopTracking();
                     }
                 });
 

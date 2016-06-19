@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Binder;
@@ -20,10 +19,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.ActivityRecognition;
@@ -31,6 +30,10 @@ import com.google.android.gms.location.DetectedActivity;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
+import com.google.android.gms.wearable.Wearable;
 
 import org.joda.time.DateTime;
 
@@ -53,6 +56,12 @@ public class LocationService extends Service {
     private static final String EXTENDED_DATA_ACTIVITY = PACKAGE_NAME + ".DATA_ACTIVITY";
     private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
+
+    private static final String LATITUDE_KEY = PACKAGE_NAME + ".latitude";
+    private static final String LONGITUDE_KEY = PACKAGE_NAME + ".longitude";
+    private static final String TIME_KEY = PACKAGE_NAME + ".time";
+    private static final String ACTIVITY_KEY = PACKAGE_NAME + ".activity";
+    private static final String SPEED_KEY = PACKAGE_NAME + ".speed";
 
     private Track mCurrentTrack;
     private TrackPoint mCurrentTrackPoint;
@@ -193,6 +202,7 @@ public class LocationService extends Service {
                         .addOnConnectionFailedListener(this)
                         .addApi(LocationServices.API)
                         .addApi(ActivityRecognition.API)
+                        .addApi(Wearable.API)
                         .build();
             }
         }
@@ -253,6 +263,16 @@ public class LocationService extends Service {
                 mCurrentTrack.addTrackPoint(point);
             }
             mLocationService.sendTrackPoint(point);
+
+            PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/trackPoint");
+            putDataMapReq.getDataMap().putDouble(LATITUDE_KEY, point.getLatitude());
+            putDataMapReq.getDataMap().putDouble(LONGITUDE_KEY, point.getLongitude());
+            putDataMapReq.getDataMap().putString(TIME_KEY, point.getTime().toString());
+            putDataMapReq.getDataMap().putString(ACTIVITY_KEY, point.getTypeOfMovement());
+            putDataMapReq.getDataMap().putDouble(SPEED_KEY, point.getSpeed());
+            PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+            PendingResult<DataApi.DataItemResult> pendingResult =
+                    Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
         }
 
         public void onResult(Status status) {
@@ -273,6 +293,7 @@ public class LocationService extends Service {
                 ActivityRecognition.ActivityRecognitionApi.removeActivityUpdates(mGoogleApiClient, getActivityDetectionPendingIntent());
             }
             mGoogleApiClient.disconnect();
+
         }
 
         private PendingIntent getActivityDetectionPendingIntent() {

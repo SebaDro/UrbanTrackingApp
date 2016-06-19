@@ -24,8 +24,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private GoogleApiClient mGoogleApiClient;
     private static final int RC_SIGN_IN = 9001;
-    private static final String PREFS_USER_ID = "userId";
-    private static final String PREFS_NAME = "user";
+    private static final String PREFS_USER_ID_KEY = "userId";
+    private static final String PREFS_NAME = "urbanTrackingPrefs";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             String userId = acct.getId();
             SharedPreferences sharedPref = this.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString(PREFS_USER_ID, userId);
+            editor.putString(PREFS_USER_ID_KEY, userId);
             editor.commit();
             if (ContextCompat.checkSelfPermission(this,
                     Manifest.permission.INTERNET)
