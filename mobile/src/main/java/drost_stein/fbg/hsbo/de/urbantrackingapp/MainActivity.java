@@ -88,6 +88,8 @@ public class MainActivity
     private static final String EXTENDED_DATA_TRACK_POINT = PACKAGE_NAME + ".DATA_TRACK_POINT";
     private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
+    private static final String BROADCAST_ACTION_NETWORK_STATUS = PACKAGE_NAME + ".BROADCAST_NETWORK_STATUS";
+    private static final String EXTENDED_DATA_NETWORK_STATUS= PACKAGE_NAME + ".DATA_NETWORK_STATUS";
 
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
     private static final String PREFS_USER_ID_KEY = "userId";
@@ -116,6 +118,11 @@ public class MainActivity
         IntentFilter trackIntentFilter = new IntentFilter(BROADCAST_ACTION_TRACK);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 trackResponseReceiver, trackIntentFilter);
+
+        NetworkStatusResponseReceiver networkReceiver=new NetworkStatusResponseReceiver();
+        IntentFilter networkStatusIntentFilter = new IntentFilter(BROADCAST_ACTION_NETWORK_STATUS);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                networkReceiver, networkStatusIntentFilter);
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -477,6 +484,15 @@ public class MainActivity
             TrackPoint point = (TrackPoint) intent.getExtras().get(EXTENDED_DATA_TRACK_POINT);
 
             mStartFragment.updateTrackPoint(point);
+        }
+    }
+
+    private class NetworkStatusResponseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Boolean isConnected = (Boolean) intent.getExtras().get(EXTENDED_DATA_NETWORK_STATUS);
+            Toast.makeText(context, isConnected.toString(), Toast.LENGTH_SHORT).show();
+
         }
     }
 

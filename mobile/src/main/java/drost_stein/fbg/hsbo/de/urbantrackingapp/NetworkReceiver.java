@@ -5,13 +5,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.Toast;
+
+import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
 
 /**
  * Handles network connections
  * Created by Seba on 11.06.2016.
  */
 public class NetworkReceiver extends BroadcastReceiver {
+    private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
+    private static final String BROADCAST_ACTION_NETWORK_STATUS = PACKAGE_NAME + ".BROADCAST_NETWORK_STATUS";
+    private static final String EXTENDED_DATA_NETWORK_STATUS= PACKAGE_NAME + ".DATA_NETWORK_STATUS";
+
     private final int WIFI = ConnectivityManager.TYPE_WIFI;
     private final int MOBILE = ConnectivityManager.TYPE_MOBILE;
 
@@ -82,20 +89,28 @@ public class NetworkReceiver extends BroadcastReceiver {
 
         if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
             if (prefferedConnectivity == MOBILE) {
-                Toast.makeText(context, R.string.mobile_connection, Toast.LENGTH_SHORT).show();
                 isPrefferedConnected = true;
+                sendNetworkChanged(isPrefferedConnected);
             }
         } else if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
             isPrefferedConnected = true;
-            Toast.makeText(context, R.string.wifi_connected, Toast.LENGTH_SHORT).show();
+            sendNetworkChanged(isPrefferedConnected);
 
         } else {
             if (isPrefferedConnected) {
                 isPrefferedConnected = false;
-                Toast.makeText(context, R.string.lost_internet_connection, Toast.LENGTH_SHORT).show();
+                sendNetworkChanged(isPrefferedConnected);
             }
 
         }
 
+    }
+    public void sendNetworkChanged(Boolean networkAvailable) {
+        Intent localIntent =
+                new Intent(BROADCAST_ACTION_NETWORK_STATUS)
+                        // Puts the location into the Intent
+                        .putExtra(EXTENDED_DATA_NETWORK_STATUS, networkAvailable);
+        // Broadcasts the Intent to receivers in this app.
+        LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent);
     }
 }
