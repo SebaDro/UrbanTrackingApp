@@ -15,7 +15,7 @@ public class NetworkReceiver extends BroadcastReceiver {
     private final int WIFI = ConnectivityManager.TYPE_WIFI;
     private final int MOBILE = ConnectivityManager.TYPE_MOBILE;
 
-    private boolean isPrefferedConnected=false;
+    private boolean isPrefferedConnected = false;
     private int prefferedConnectivity;
     private Context context;
 
@@ -76,25 +76,24 @@ public class NetworkReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        ConnectivityManager conn =  (ConnectivityManager)
+        ConnectivityManager conn = (ConnectivityManager)
                 context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = conn.getActiveNetworkInfo();
 
         if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE) {
-            if (prefferedConnectivity ==MOBILE){
+            if (prefferedConnectivity == MOBILE) {
                 Toast.makeText(context, R.string.mobile_connection, Toast.LENGTH_SHORT).show();
-                isPrefferedConnected=true;
+                isPrefferedConnected = true;
             }
-        }
-        else if (networkInfo != null&& networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
-            isPrefferedConnected=true;
+        } else if (networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI) {
+            isPrefferedConnected = true;
             Toast.makeText(context, R.string.wifi_connected, Toast.LENGTH_SHORT).show();
 
         } else {
-                if (isPrefferedConnected){
-                    isPrefferedConnected=false;
-                    Toast.makeText(context, R.string.lost_internet_connection, Toast.LENGTH_SHORT).show();
-                }
+            if (isPrefferedConnected) {
+                isPrefferedConnected = false;
+                Toast.makeText(context, R.string.lost_internet_connection, Toast.LENGTH_SHORT).show();
+            }
 
         }
 

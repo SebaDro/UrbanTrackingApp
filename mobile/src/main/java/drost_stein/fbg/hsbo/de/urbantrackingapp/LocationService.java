@@ -257,8 +257,8 @@ public class LocationService extends Service {
             }
             if (mLastLocation != null) {
                 DateTime time = new DateTime(location.getTime());
-                point = new TrackPoint(location.getTime(), 2l,mUserID, location.getLatitude(), location.getLongitude(),
-                        location.getAltitude(), location.getBearing(),location.getSpeed(), location.getAccuracy(), time, activity);
+                point = new TrackPoint(location.getTime(), 2l, mUserID, location.getLatitude(), location.getLongitude(),
+                        location.getAltitude(), location.getBearing(), location.getSpeed(), location.getAccuracy(), time, activity);
                 mCurrentTrackPoint = point;
                 mCurrentTrack.addTrackPoint(point);
             }

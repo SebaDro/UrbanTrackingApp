@@ -21,7 +21,7 @@ import java.util.Map;
 public class MapFragment extends Fragment {
 
     private Map map;
-   // private MapView mMapView;
+    // private MapView mMapView;
 
     private OnFragmentInteractionListener mListener;
 
@@ -38,7 +38,7 @@ public class MapFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_map, container, false);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
         MapView mapView = (MapView) view.findViewById(R.id.map);
         mListener.onMapFragmentGetMapView(mapView);
 
@@ -67,7 +67,7 @@ public class MapFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
+     * <p>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.

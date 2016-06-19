@@ -69,7 +69,7 @@ public class StartFragment extends Fragment {
     }
 
     public void enableSwitch() {
-        mSwitch.setOnCheckedChangeListener (null);
+        mSwitch.setOnCheckedChangeListener(null);
         mSwitch.setChecked(true);
         mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -174,14 +174,16 @@ public class StartFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
+     * <p>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
         void onStartFragmentStarted();
+
         void onStartFragmentStartTracking();
+
         void onStartFragmentStopTracking();
     }
 }
