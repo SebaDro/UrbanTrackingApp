@@ -56,4 +56,14 @@
     <string name="mobile_connection">Internetverbindung verfügbar</string>
     <string name="lost_wifi_connection">Keine WIFI Verbindung</string>
     <string name="lost_internet_connection">Keine Internetverbindung</string>
+
+    <string name="upload_tracks">Tracks hochladen</string>
+    <string name="unsynced_tracks">Unsynchronisierte Tracks:</string>
+    <string name="unsynced_track_points">Unsynchronisierte Trackpoints:</string>
+    <string name="start_upload">Upload starten</string>
+
+    <string name="no_features">Keine Tracks für den Upload vorhanden</string>
+    <string name="feature_upload_success">Upload erfolgreich</string>
+    <string name="feature_upload_error">Upload fehlgeschlagen</string>
+
 </resources>

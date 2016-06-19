@@ -30,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esri.android.map.FeatureLayer;
@@ -37,6 +38,7 @@ import com.esri.android.map.MapView;
 import com.esri.core.geodatabase.GeodatabaseEditError;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
 import com.esri.core.map.CallbackListener;
+import com.esri.core.map.FeatureEditError;
 import com.esri.core.tasks.query.QueryParameters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -89,11 +91,13 @@ public class MainActivity
     private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
     private static final String BROADCAST_ACTION_NETWORK_STATUS = PACKAGE_NAME + ".BROADCAST_NETWORK_STATUS";
-    private static final String EXTENDED_DATA_NETWORK_STATUS= PACKAGE_NAME + ".DATA_NETWORK_STATUS";
+    private static final String EXTENDED_DATA_NETWORK_STATUS = PACKAGE_NAME + ".DATA_NETWORK_STATUS";
 
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
     private static final String PREFS_USER_ID_KEY = "userId";
     private static final String PREFS_NAME = "urbanTrackingPrefs";
+
+    private static final String SERVICE_URL = "http://services6.arcgis.com/RF3oqOe1dChQus9k/arcgis/rest/services/UrbanTrackPoints/FeatureServer";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,7 +123,7 @@ public class MainActivity
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 trackResponseReceiver, trackIntentFilter);
 
-        NetworkStatusResponseReceiver networkReceiver=new NetworkStatusResponseReceiver();
+        NetworkStatusResponseReceiver networkReceiver = new NetworkStatusResponseReceiver();
         IntentFilter networkStatusIntentFilter = new IntentFilter(BROADCAST_ACTION_NETWORK_STATUS);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 networkReceiver, networkStatusIntentFilter);
@@ -171,6 +175,8 @@ public class MainActivity
             doBindLocationService();
         }
 
+        unSyncedTracks=new ArrayList<Track>();
+        mFeatureServiceTable = new GeodatabaseFeatureServiceTable(SERVICE_URL, 0);
         JodaTimeAndroid.init(this);
     }
 
@@ -284,9 +290,7 @@ public class MainActivity
     /**
      * Adds the Feature-Service for trackpoints to the map
      */
-    private void addTrackPointFeatureService() {
-        String serviceURL = "http://services6.arcgis.com/RF3oqOe1dChQus9k/arcgis/rest/services/UrbanTrackPoints/FeatureServer";
-        mFeatureServiceTable = new GeodatabaseFeatureServiceTable(serviceURL, 0);
+    private void initializeTrackPointFeatureService() {
         mFeatureServiceTable.setFeatureRequestMode(GeodatabaseFeatureServiceTable.FeatureRequestMode.MANUAL_CACHE);
         mFeatureServiceTable.initialize(
                 new CallbackListener<GeodatabaseFeatureServiceTable.Status>() {
@@ -363,7 +367,9 @@ public class MainActivity
     @Override
     public void onMapFragmentGetMapView(MapView mapView) {
         mMapView = mapView;
-        addTrackPointFeatureService();
+        if (mNetworkReceiver.hasPrefferedConnection() && mFeatureServiceTable.getStatus() != GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
+            initializeTrackPointFeatureService();
+        }
     }
 
     @Override
@@ -429,6 +435,7 @@ public class MainActivity
             //Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
             //toast.show();
         }
+        mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
     }
 
     @Override
@@ -478,6 +485,39 @@ public class MainActivity
         }
     }
 
+    @Override
+    public void onSettingsFragmentUploadTracks() {
+        if (unSyncedTracks.size() != 0) {
+            if (mNetworkReceiver.hasPrefferedConnection() && mFeatureServiceTable.getStatus() == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
+                trackPointsource.addTrackListToTable(unSyncedTracks);
+                mFeatureServiceTable.applyEdits(new CallbackListener<List<GeodatabaseEditError>>() {
+                    @Override
+                    public void onCallback(List<GeodatabaseEditError> geodatabaseEditErrors) {
+                        unSyncedTracks.clear();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+                            }
+                        });
+
+                        Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_success), Toast.LENGTH_SHORT).show();
+                    }
+                    @Override
+                    public void onError(Throwable throwable) {
+                        Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_error), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } else {
+                Toast.makeText(getApplicationContext(), getString(R.string.lost_internet_connection), Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), getString(R.string.no_features), Toast.LENGTH_SHORT).show();
+        }
+
+
+    }
+
     private class TrackPointResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -491,8 +531,11 @@ public class MainActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Boolean isConnected = (Boolean) intent.getExtras().get(EXTENDED_DATA_NETWORK_STATUS);
-            Toast.makeText(context, isConnected.toString(), Toast.LENGTH_SHORT).show();
-
+            if (isConnected) {
+                if (mFeatureServiceTable.getStatus() != GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
+                    initializeTrackPointFeatureService();
+                }
+            }
         }
     }
 
@@ -511,25 +554,11 @@ public class MainActivity
             }
             Toast toast = Toast.makeText(getApplicationContext(), trackInfo, Toast.LENGTH_LONG);
             toast.show();
-            trackPointsource.addTrackToTable(track);
-            if (unSyncedTracks == null) {
-                unSyncedTracks = new ArrayList<Track>();
-            }
-            if (mNetworkReceiver.hasPrefferedConnection()) {
-                mFeatureServiceTable.applyEdits(new CallbackListener<List<GeodatabaseEditError>>() {
-                    @Override
-                    public void onCallback(List<GeodatabaseEditError> geodatabaseEditErrors) {
 
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-
-                    }
-                });
-            } else {
+            if (track.getTrackPoints().size()>0){
                 unSyncedTracks.add(track);
             }
+            mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
         }
     }
 }

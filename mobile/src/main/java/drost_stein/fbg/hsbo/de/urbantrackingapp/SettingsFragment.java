@@ -9,7 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.esri.android.map.MapView;
 
 
 /**
@@ -23,6 +26,8 @@ public class SettingsFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
     private SeekBar mUpdateIntervalSeekBar;
     private Button mResetButton;
+    private Button mUploadButton;
+    private View mView;
     private int seekBarMax = 360000;
     private int seekBarMin = 5000;
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
@@ -42,9 +47,9 @@ public class SettingsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        mView = inflater.inflate(R.layout.fragment_settings, container, false);
 
-        mUpdateIntervalSeekBar = (SeekBar) view.findViewById(R.id.seekBar);
+        mUpdateIntervalSeekBar = (SeekBar) mView.findViewById(R.id.seekBar);
 
         mUpdateIntervalSeekBar.setMax(seekBarMax - seekBarMin);
 
@@ -71,7 +76,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        mResetButton = (Button) view.findViewById(R.id.resetButton);
+        mResetButton = (Button) mView.findViewById(R.id.resetButton);
         mResetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -82,7 +87,21 @@ public class SettingsFragment extends Fragment {
                 getActivity().finish();
             }
         });
-        return view;
+
+        mUploadButton=(Button) mView.findViewById(R.id.uploadButton);
+        mUploadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mListener.onSettingsFragmentUploadTracks();
+            }
+        });
+
+        return mView;
+    }
+
+    public void setUnsyncedTracksCount(int count){
+        TextView countTracks=(TextView)mView.findViewById(R.id.count_unsynced_tracks);
+        countTracks.setText(String.valueOf(count));
     }
 
     public int getUpdateIntervalFromPreferences() {
@@ -119,5 +138,6 @@ public class SettingsFragment extends Fragment {
      * >Communicating with Other Fragments</a> for more information.
      */
     public interface OnFragmentInteractionListener {
+        void onSettingsFragmentUploadTracks();
     }
 }
