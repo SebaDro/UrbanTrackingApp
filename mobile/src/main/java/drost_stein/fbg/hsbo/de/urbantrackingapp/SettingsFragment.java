@@ -76,18 +76,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        mResetButton = (Button) mView.findViewById(R.id.resetButton);
-        mResetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPreferences sharedPref = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedPref.edit();
-                editor.putString(PREFS_USER_ID_KEY, null);
-                editor.commit();
-                getActivity().finish();
-            }
-        });
-
         mUploadButton=(Button) mView.findViewById(R.id.uploadButton);
         mUploadButton.setOnClickListener(new View.OnClickListener() {
             @Override
