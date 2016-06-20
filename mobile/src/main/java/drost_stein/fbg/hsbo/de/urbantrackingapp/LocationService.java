@@ -204,7 +204,7 @@ public class LocationService extends Service {
                         .addOnConnectionFailedListener(this)
                         .addApi(LocationServices.API)
                         .addApi(ActivityRecognition.API)
-                        .addApi(Wearable.API)
+                        //.addApi(Wearable.API)
                         .build();
             }
         }
@@ -246,7 +246,6 @@ public class LocationService extends Service {
 
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
         }
 
         @Override
@@ -267,7 +266,7 @@ public class LocationService extends Service {
             mLocationService.sendTrackPoint(point);
             trackPointCounter++;
 
-            PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/trackPoint");
+            /*PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/trackPoint");
             putDataMapReq.getDataMap().putDouble(LATITUDE_KEY, point.getLatitude());
             putDataMapReq.getDataMap().putDouble(LONGITUDE_KEY, point.getLongitude());
             putDataMapReq.getDataMap().putString(TIME_KEY, point.getTime().toString());
@@ -275,7 +274,7 @@ public class LocationService extends Service {
             putDataMapReq.getDataMap().putDouble(SPEED_KEY, point.getSpeed());
             PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
             PendingResult<DataApi.DataItemResult> pendingResult =
-                    Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);
+                    Wearable.DataApi.putDataItem(mGoogleApiClient, putDataReq);*/
         }
 
         public void onResult(Status status) {
