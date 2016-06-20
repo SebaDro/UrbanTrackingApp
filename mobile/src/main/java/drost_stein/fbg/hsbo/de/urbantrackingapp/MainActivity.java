@@ -446,6 +446,8 @@ public class MainActivity
         if (mNetworkReceiver != null) {
             this.unregisterReceiver(mNetworkReceiver);
         }
+        mFeatureServiceTable.dispose();
+
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
