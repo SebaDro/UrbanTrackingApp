@@ -336,18 +336,8 @@ public class LocationService extends Service {
     private class ActivitiesResponseReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ArrayList<DetectedActivity> detectedActivities = intent.getParcelableArrayListExtra(EXTENDED_DATA_ACTIVITY);
-            DetectedActivity likelyActivity = null;
-            for (DetectedActivity activity : detectedActivities) {
-                if (likelyActivity == null) {
-                    likelyActivity = activity;
-                } else {
-                    if (likelyActivity.getConfidence() < activity.getConfidence()) {
-                        likelyActivity = activity;
-                    }
-                }
-            }
-            mCurrentActivity = likelyActivity;
+            DetectedActivity detectedActivity = intent.getParcelableExtra(EXTENDED_DATA_ACTIVITY);
+            mCurrentActivity = detectedActivity;
         }
     }
 }

@@ -12,8 +12,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esri.android.map.MapView;
-
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,13 +23,11 @@ public class SettingsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private SeekBar mUpdateIntervalSeekBar;
-    private Button mResetButton;
     private Button mUploadButton;
     private View mView;
     private int seekBarMax = 360000;
     private int seekBarMin = 5000;
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
-    private static final String PREFS_USER_ID_KEY = "userId";
     private static final String PREFS_NAME = "urbanTrackingPrefs";
 
     public SettingsFragment() {

@@ -31,9 +31,9 @@ public class ActivitiesIntentService extends IntentService {
         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
         Intent i = new Intent(BROADCAST_ACTION_ACTIVITY);
 
-        ArrayList<DetectedActivity> detectedActivities = (ArrayList) result.getProbableActivities();
+        DetectedActivity detectedActivity = result.getMostProbableActivity();
 
-        i.putExtra(EXTENDED_DATA_ACTIVITY, detectedActivities);
+        i.putExtra(EXTENDED_DATA_ACTIVITY, detectedActivity);
         LocalBroadcastManager.getInstance(this).sendBroadcast(i);
     }
 }
