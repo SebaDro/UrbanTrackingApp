@@ -107,7 +107,7 @@
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="20dp"
                             android:layout_weight="5"
-                            android:text="@{startVM.trackPoint.time.toString()}" />
+                            android:text="@{startVM.trackPoint.time.toString(&quot;dd.MM.yyyy - HH:mm:ss&quot;)}" />
 
                     </LinearLayout>
 
