@@ -3,6 +3,7 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 import android.content.Context;
 import android.content.res.Resources;
 import android.databinding.DataBindingUtil;
+import android.location.Address;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -117,6 +118,22 @@ public class StartFragment extends Fragment {
     public void updateTrackPoint(TrackPoint point) {
         handleDetectedActivity(point.getTypeOfMovement());
         startFragmentVM.setTrackPoint(point);
+    }
+
+    public void updateAddress(Address address){
+        String addressString = "";
+        if (address == null) {
+            addressString = getString(R.string.unknown_address);
+        } else {
+            addressString = address.getAddressLine(0)+", " +address.getAddressLine(1);
+        }
+
+
+        if (getView()!=null){
+            TextView addressView = (TextView) getView().findViewById(R.id.address);
+            addressView.setText(addressString);
+        }
+
     }
 
     /**

@@ -578,14 +578,7 @@ public class MainActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             Address address = intent.getParcelableExtra(EXTENDED_DATA_ADDRESS);
-            String addressString = "";
-            if (address == null) {
-                addressString = getString(R.string.unknown_address);
-            } else {
-                addressString = address.getAddressLine(0)+", " +address.getAddressLine(1);
-            }
-            TextView addressView = (TextView) mStartFragment.getView().findViewById(R.id.address);
-            addressView.setText(addressString);
+            mStartFragment.updateAddress(address);
         }
     }
 }
