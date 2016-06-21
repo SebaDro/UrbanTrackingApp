@@ -65,4 +65,6 @@
     <string name="feature_upload_success">Upload Success</string>
     <string name="feature_upload_error">Upload Fail</string>
 
+    <string name="unknown_address">Unknown Address</string>
+
 </resources>

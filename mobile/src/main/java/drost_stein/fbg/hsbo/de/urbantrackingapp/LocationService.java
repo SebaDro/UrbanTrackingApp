@@ -9,12 +9,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -57,11 +59,15 @@ public class LocationService extends Service {
     private static final String BROADCAST_ACTION_TRACK = PACKAGE_NAME + ".BROADCAST_TRACK";
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
 
+
+    public static final String LOCATION_DATA_EXTRA = PACKAGE_NAME + ".LOCATION_DATA_EXTRA";
+
     private static final String LATITUDE_KEY = PACKAGE_NAME + ".latitude";
     private static final String LONGITUDE_KEY = PACKAGE_NAME + ".longitude";
     private static final String TIME_KEY = PACKAGE_NAME + ".time";
     private static final String ACTIVITY_KEY = PACKAGE_NAME + ".activity";
     private static final String SPEED_KEY = PACKAGE_NAME + ".speed";
+
 
     private Track mCurrentTrack;
     private TrackPoint mCurrentTrackPoint;
@@ -73,6 +79,9 @@ public class LocationService extends Service {
     private ServiceHandler mServiceHandler;
 
     private NotificationManager mNM;
+
+    private String mAddressOutput;
+
 
     /**
      * Class for clients to access.  Because we know this service always
@@ -105,6 +114,9 @@ public class LocationService extends Service {
         IntentFilter activityIntentFilter = new IntentFilter(BROADCAST_ACTION_ACTIVITY);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 activitiesResponseReceiver, activityIntentFilter);
+
+
+
         trackPointCounter=0;
         DateTime startTime = DateTime.now();
         mCurrentTrack = new Track(startTime.getMillis(), mUserID, startTime);
@@ -266,6 +278,10 @@ public class LocationService extends Service {
             mLocationService.sendTrackPoint(point);
             trackPointCounter++;
 
+            Intent intent = new Intent(getApplicationContext(), GeocodingIntentService.class);
+            intent.putExtra(LOCATION_DATA_EXTRA, mLastLocation);
+            startService(intent);
+
             /*PutDataMapRequest putDataMapReq = PutDataMapRequest.create("/trackPoint");
             putDataMapReq.getDataMap().putDouble(LATITUDE_KEY, point.getLatitude());
             putDataMapReq.getDataMap().putDouble(LONGITUDE_KEY, point.getLongitude());
@@ -340,4 +356,27 @@ public class LocationService extends Service {
             mCurrentActivity = detectedActivity;
         }
     }
+
+
+    /*
+    private class AddressResultReceiver extends ResultReceiver {
+        public AddressResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+
+            // Display the address string
+            // or an error message sent from the intent service.
+            mAddressOutput = resultData.getString(RESULT_DATA_KEY);
+            //displayAddressOutput();
+
+            // Show a toast message if an address was found.
+            if (resultCode == SUCCESS_RESULT) {
+                //showToast(getString(R.string.address_found));
+            }
+
+        }
+    }*/
 }

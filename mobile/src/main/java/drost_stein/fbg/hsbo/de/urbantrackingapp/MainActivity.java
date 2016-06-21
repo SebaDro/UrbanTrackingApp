@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.Address;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -92,6 +93,8 @@ public class MainActivity
     private static final String EXTENDED_DATA_TRACK = PACKAGE_NAME + ".DATA_TRACK";
     private static final String BROADCAST_ACTION_NETWORK_STATUS = PACKAGE_NAME + ".BROADCAST_NETWORK_STATUS";
     private static final String EXTENDED_DATA_NETWORK_STATUS = PACKAGE_NAME + ".DATA_NETWORK_STATUS";
+    public static final String BROADCAST_ACTION_ADDRESS = PACKAGE_NAME + ".BROADCAST_ADDRESS";
+    private static final String EXTENDED_DATA_ADDRESS = PACKAGE_NAME + ".DATA_ADDRESS";
 
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
     private static final String PREFS_USER_ID_KEY = "userId";
@@ -127,6 +130,11 @@ public class MainActivity
         IntentFilter networkStatusIntentFilter = new IntentFilter(BROADCAST_ACTION_NETWORK_STATUS);
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 networkReceiver, networkStatusIntentFilter);
+
+        AddressResponseReceiver addressResponseReceiver = new AddressResponseReceiver();
+        IntentFilter addressIntentFilter = new IntentFilter(BROADCAST_ACTION_ADDRESS);
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                addressResponseReceiver, addressIntentFilter);
 
 
         /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -560,6 +568,24 @@ public class MainActivity
                 unSyncedTracks.add(track);
             }
             mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+        }
+    }
+
+    /**
+     * Receives an address and displays it on the start fragment
+     */
+    private class AddressResponseReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Address address = intent.getParcelableExtra(EXTENDED_DATA_ADDRESS);
+            String addressString = "";
+            if (address == null) {
+                addressString = getString(R.string.unknown_address);
+            } else {
+                addressString = address.getAddressLine(0)+", " +address.getAddressLine(1);
+            }
+            TextView addressView = (TextView) mStartFragment.getView().findViewById(R.id.address);
+            addressView.setText(addressString);
         }
     }
 }

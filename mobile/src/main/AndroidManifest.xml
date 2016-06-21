@@ -38,6 +38,10 @@
         <service
             android:name=".ActivitiesIntentService"
             android:exported="false" />
+        <service
+            android:name=".GeocodingIntentService"
+            android:exported="false"/>
+
 
         <service
             android:name=".DataLayerListenerService"

@@ -172,12 +172,13 @@
                             android:src="@drawable/ic_place" />
 
                         <TextView
+                            android:id="@+id/address"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
                             android:layout_marginStart="20dp"
                             android:layout_weight="5"
-                            android:text="immer da, wo was los ist" />
+                            android:text="@string/unknown_address"/>
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
