@@ -67,5 +67,7 @@
     <string name="feature_upload_error">Upload fehlgeschlagen</string>
 
     <string name="unknown_address">Unbekannte Adresse</string>
+    <string name="feature_upload_title">Track Upload</string>
+    <string name="feature_upload_message">Bitte warten Sie auf den Upload der Tracks</string>
 
 </resources>

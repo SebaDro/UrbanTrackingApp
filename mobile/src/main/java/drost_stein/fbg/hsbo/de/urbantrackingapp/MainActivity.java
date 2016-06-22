@@ -2,6 +2,7 @@ package drost_stein.fbg.hsbo.de.urbantrackingapp;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -14,15 +15,12 @@ import android.location.Address;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -31,7 +29,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.esri.android.map.FeatureLayer;
@@ -39,7 +36,6 @@ import com.esri.android.map.MapView;
 import com.esri.core.geodatabase.GeodatabaseEditError;
 import com.esri.core.geodatabase.GeodatabaseFeatureServiceTable;
 import com.esri.core.map.CallbackListener;
-import com.esri.core.map.FeatureEditError;
 import com.esri.core.tasks.query.QueryParameters;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -83,6 +79,8 @@ public class MainActivity
     private LocationService mLocationService;
     // Flag indicating whether we have called bind on the service.
     private boolean mIsLocationServiceBound;
+
+    private ProgressDialog progressDialog;
 
     private String mUserID;
 
@@ -162,6 +160,7 @@ public class MainActivity
             mSettingsFragment = new SettingsFragment();
             mMapFragment = new MapFragment();
 
+
             transaction.add(R.id.content_frame, mStartFragment, "start_fragment");
             transaction.add(R.id.content_frame, mSettingsFragment, "settings_fragment");
             transaction.add(R.id.content_frame, mMapFragment, "map_fragment");
@@ -186,6 +185,7 @@ public class MainActivity
         unSyncedTracks = new ArrayList<Track>();
         mFeatureServiceTable = new GeodatabaseFeatureServiceTable(SERVICE_URL, 0);
         JodaTimeAndroid.init(this);
+
     }
 
 
@@ -497,27 +497,44 @@ public class MainActivity
 
     @Override
     public void onSettingsFragmentUploadTracks() {
+
+
         if (unSyncedTracks.size() != 0) {
             if (mNetworkReceiver.hasPrefferedConnection() && mFeatureServiceTable.getStatus() == GeodatabaseFeatureServiceTable.Status.INITIALIZED&&trackPointsource!=null) {
-                trackPointsource.addTrackListToTable(unSyncedTracks);
-                mFeatureServiceTable.applyEdits(new CallbackListener<List<GeodatabaseEditError>>() {
-                    @Override
-                    public void onCallback(List<GeodatabaseEditError> geodatabaseEditErrors) {
-                        unSyncedTracks.clear();
+                new Thread(new Runnable() {
+                    public void run() {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
-                                Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_success), Toast.LENGTH_SHORT).show();
+                                //progressDialog.show();
+                                progressDialog=ProgressDialog.show(mStartFragment.getContext(),getString(R.string.feature_upload_title),getString(R.string.feature_upload_message));
+                            }
+                        });
+                        trackPointsource.addTrackListToTable(unSyncedTracks);
+                        mFeatureServiceTable.applyEdits(new CallbackListener<List<GeodatabaseEditError>>() {
+                            @Override
+                            public void onCallback(List<GeodatabaseEditError> geodatabaseEditErrors) {
+                                unSyncedTracks.clear();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+                                        progressDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_success), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onError(Throwable throwable) {
+
+                                progressDialog.dismiss();
+                                Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_error), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
+                }).start();
 
-                    @Override
-                    public void onError(Throwable throwable) {
-                        Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_error), Toast.LENGTH_SHORT).show();
-                    }
-                });
             } else {
                 Toast.makeText(getApplicationContext(), getString(R.string.lost_internet_connection), Toast.LENGTH_SHORT).show();
             }
