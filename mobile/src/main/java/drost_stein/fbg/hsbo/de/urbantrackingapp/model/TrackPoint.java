@@ -34,13 +34,16 @@ public class TrackPoint extends BaseObservable implements Serializable {
         this.longitude = lon;
         this.altitude = alt;
         this.bearing = bearing;
-        this.speed=speed;
+        this.speed=getSpeedInKmh(speed);
 
         this.precision = precision;
         this.time=time;
         this.typeOfMovement = type;
     }
 
+    private double getSpeedInKmh(double speed) {
+        return speed*3.6;
+    }
 
 
     @Bindable

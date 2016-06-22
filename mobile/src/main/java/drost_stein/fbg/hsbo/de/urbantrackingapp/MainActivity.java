@@ -498,7 +498,7 @@ public class MainActivity
     @Override
     public void onSettingsFragmentUploadTracks() {
         if (unSyncedTracks.size() != 0) {
-            if (mNetworkReceiver.hasPrefferedConnection() && mFeatureServiceTable.getStatus() == GeodatabaseFeatureServiceTable.Status.INITIALIZED) {
+            if (mNetworkReceiver.hasPrefferedConnection() && mFeatureServiceTable.getStatus() == GeodatabaseFeatureServiceTable.Status.INITIALIZED&&trackPointsource!=null) {
                 trackPointsource.addTrackListToTable(unSyncedTracks);
                 mFeatureServiceTable.applyEdits(new CallbackListener<List<GeodatabaseEditError>>() {
                     @Override
