@@ -9,14 +9,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.location.Address;
 import android.location.Location;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -38,8 +34,6 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import org.joda.time.DateTime;
-
-import java.util.ArrayList;
 
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.Track;
 import drost_stein.fbg.hsbo.de.urbantrackingapp.model.TrackPoint;
@@ -75,12 +69,7 @@ public class LocationService extends Service {
     private String mUserID;
     private long trackPointCounter;
 
-    private Looper mServiceLooper;
-    private ServiceHandler mServiceHandler;
-
     private NotificationManager mNM;
-
-    private String mAddressOutput;
 
 
     /**
@@ -91,13 +80,6 @@ public class LocationService extends Service {
     public class LocalBinder extends Binder {
         LocationService getService() {
             return LocationService.this;
-        }
-    }
-
-    // Handler that receives messages from the thread
-    private final class ServiceHandler extends Handler {
-        public ServiceHandler(Looper looper) {
-            super(looper);
         }
     }
 
@@ -115,9 +97,7 @@ public class LocationService extends Service {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 activitiesResponseReceiver, activityIntentFilter);
 
-
-
-        trackPointCounter=0;
+        trackPointCounter = 0;
         DateTime startTime = DateTime.now();
         mCurrentTrack = new Track(startTime.getMillis(), mUserID, startTime);
         myLocationListener.startLocationUpdates();
@@ -145,6 +125,7 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         myLocationListener.stopLocationUpdates();
+        mNM.cancelAll();
         DateTime endTime = DateTime.now();
         mCurrentTrack.setEndTime(endTime);
         sendTrack(mCurrentTrack);
@@ -270,8 +251,8 @@ public class LocationService extends Service {
             }
             if (mLastLocation != null) {
                 DateTime time = new DateTime(location.getTime());
-                point = new TrackPoint(trackPointCounter, mCurrentTrack.getId(),mUserID, location.getLatitude(), location.getLongitude(),
-                        location.getAltitude(), location.getBearing(),location.getSpeed(), location.getAccuracy(), time, activity);
+                point = new TrackPoint(trackPointCounter, mCurrentTrack.getId(), mUserID, location.getLatitude(), location.getLongitude(),
+                        location.getAltitude(), location.getBearing(), location.getSpeed(), location.getAccuracy(), time, activity);
                 mCurrentTrackPoint = point;
                 mCurrentTrack.addTrackPoint(point);
             }
@@ -356,27 +337,4 @@ public class LocationService extends Service {
             mCurrentActivity = detectedActivity;
         }
     }
-
-
-    /*
-    private class AddressResultReceiver extends ResultReceiver {
-        public AddressResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-
-            // Display the address string
-            // or an error message sent from the intent service.
-            mAddressOutput = resultData.getString(RESULT_DATA_KEY);
-            //displayAddressOutput();
-
-            // Show a toast message if an address was found.
-            if (resultCode == SUCCESS_RESULT) {
-                //showToast(getString(R.string.address_found));
-            }
-
-        }
-    }*/
 }
