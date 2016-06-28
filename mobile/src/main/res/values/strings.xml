@@ -69,4 +69,8 @@
     <string name="feature_upload_title">Track Upload</string>
     <string name="feature_upload_message">Please wait for uploading the tracks</string>
 
+    <string name="internet_settings">Internet Setting</string>
+    <string name="switchOnlyWIFIOn">Only WIFI on</string>
+    <string name="switchOnlyWIFIOff">Only WIFI off</string>
+
 </resources>

@@ -83,6 +83,7 @@ public class MainActivity
     private ProgressDialog progressDialog;
 
     private String mUserID;
+    private int connectivityType;
 
     private static final String PACKAGE_NAME = "drost_stein.fbg.hsbo.de.urbantrackingapp";
     private static final String BROADCAST_ACTION_TRACK_POINT = PACKAGE_NAME + ".BROADCAST_TRACK_POINT";
@@ -96,6 +97,7 @@ public class MainActivity
 
     private static final String PREFS_UPDATE_INTERVAL_KEY = "updateInterval";
     private static final String PREFS_USER_ID_KEY = "userId";
+    private static final String PREFS_CONNECTIVITY_TYPE="connectivityType";
     private static final String PREFS_NAME = "urbanTrackingPrefs";
 
     private static final String SERVICE_URL = "http://services6.arcgis.com/RF3oqOe1dChQus9k/arcgis/rest/services/UrbanTrackPoints/FeatureServer";
@@ -171,7 +173,8 @@ public class MainActivity
 
         // Registers BroadcastReceiver to track network connection changes.
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
-        mNetworkReceiver = new NetworkReceiver(ConnectivityManager.TYPE_WIFI, getApplicationContext());
+        connectivityType=sharedPref.getInt(PREFS_CONNECTIVITY_TYPE, NetworkReceiver.WIFI);
+        mNetworkReceiver = new NetworkReceiver(connectivityType, getApplicationContext());
         this.registerReceiver(mNetworkReceiver, filter);
 
         gsonBuilder = new GsonBuilder();
@@ -443,7 +446,7 @@ public class MainActivity
             //Toast toast = Toast.makeText(mMapFragment.getContext(), info, Toast.LENGTH_LONG);
             //toast.show();
         }
-        mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+        mSettingsFragment.updateUnsyncedTracksCount(unSyncedTracks.size());
     }
 
     @Override
@@ -518,7 +521,7 @@ public class MainActivity
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+                                        mSettingsFragment.updateUnsyncedTracksCount(unSyncedTracks.size());
                                         progressDialog.dismiss();
                                         Toast.makeText(getApplicationContext(), getString(R.string.feature_upload_success), Toast.LENGTH_SHORT).show();
                                     }
@@ -541,8 +544,22 @@ public class MainActivity
         } else {
             Toast.makeText(getApplicationContext(), getString(R.string.no_features), Toast.LENGTH_SHORT).show();
         }
+    }
 
-
+    @Override
+    public void onWIFISwitchChecked(boolean wifiChecked) {
+        if (wifiChecked){
+            connectivityType=NetworkReceiver.WIFI;
+            mNetworkReceiver.setPrefferedConnectivity(connectivityType);
+        }
+        else{
+            connectivityType=NetworkReceiver.MOBILE;
+            mNetworkReceiver.setPrefferedConnectivity(connectivityType);
+        }
+        SharedPreferences sharedPref = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putInt(PREFS_CONNECTIVITY_TYPE, connectivityType);
+        editor.commit();
     }
 
     private class TrackPointResponseReceiver extends BroadcastReceiver {
@@ -584,7 +601,7 @@ public class MainActivity
             if (track.getTrackPoints().size() > 0) {
                 unSyncedTracks.add(track);
             }
-            mSettingsFragment.setUnsyncedTracksCount(unSyncedTracks.size());
+            mSettingsFragment.updateUnsyncedTracksCount(unSyncedTracks.size());
         }
     }
 

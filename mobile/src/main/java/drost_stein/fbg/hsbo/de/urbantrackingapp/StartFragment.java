@@ -32,7 +32,7 @@ public class StartFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private TrackPoint mCurrentTrackPoint;
-    private Switch mSwitch;
+    private Switch mSwitchTracking;
 
     public StartFragment() {
         // Required empty public constructor
@@ -53,8 +53,8 @@ public class StartFragment extends Fragment {
         mCurrentTrackPoint = startFragmentVM.getTrackPoint();
         binding.setStartVM(startFragmentVM);
 
-        mSwitch = (Switch) view.findViewById(R.id.switch_Tracking);
-        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mSwitchTracking = (Switch) view.findViewById(R.id.switch_Tracking);
+        mSwitchTracking.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     handleTrackingSwitchChecked();
@@ -70,9 +70,9 @@ public class StartFragment extends Fragment {
     }
 
     public void enableSwitch() {
-        mSwitch.setOnCheckedChangeListener(null);
-        mSwitch.setChecked(true);
-        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        mSwitchTracking.setOnCheckedChangeListener(null);
+        mSwitchTracking.setChecked(true);
+        mSwitchTracking.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     handleTrackingSwitchChecked();
@@ -84,15 +84,23 @@ public class StartFragment extends Fragment {
     }
 
 
+    /**
+     * sets the text of the tracking switch and notifies the MainActivity for unchecking the switch
+     * to stop the tracking
+     */
     private void handleTrackingSwitchUnChecked() {
-        mSwitch.setText(R.string.switchStartTracking);
+        mSwitchTracking.setText(R.string.switchStartTracking);
         if (mListener != null) {
             mListener.onStartFragmentStopTracking();
         }
     }
 
+    /**
+     * sets the text of the tracking switch and notifies the MainActivity for checking the switch
+     * to start the tracking
+     */
     private void handleTrackingSwitchChecked() {
-        mSwitch.setText(R.string.switchStopTracking);
+        mSwitchTracking.setText(R.string.switchStopTracking);
         if (mListener != null) {
             mListener.onStartFragmentStartTracking();
         }

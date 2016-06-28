@@ -19,8 +19,8 @@ public class NetworkReceiver extends BroadcastReceiver {
     private static final String BROADCAST_ACTION_NETWORK_STATUS = PACKAGE_NAME + ".BROADCAST_NETWORK_STATUS";
     private static final String EXTENDED_DATA_NETWORK_STATUS= PACKAGE_NAME + ".DATA_NETWORK_STATUS";
 
-    private final int WIFI = ConnectivityManager.TYPE_WIFI;
-    private final int MOBILE = ConnectivityManager.TYPE_MOBILE;
+    public final static int WIFI = ConnectivityManager.TYPE_WIFI;
+    public final static int MOBILE = ConnectivityManager.TYPE_MOBILE;
 
     private boolean isPrefferedConnected = false;
     private int prefferedConnectivity;
